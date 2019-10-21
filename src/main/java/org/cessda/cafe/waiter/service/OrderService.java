@@ -10,7 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
+
+import org.cessda.cafe.waiter.data.model.Machines;
 import org.cessda.cafe.waiter.data.model.Order;
+import org.cessda.cafe.waiter.data.model.ProcessedJobs;
 import org.cessda.cafe.waiter.database.DatabaseClass;
 
 public class OrderService {
@@ -25,6 +31,23 @@ private Map<String, Order> orderList = DatabaseClass.getOrder();
 /* Engine method to retrieve data from cashier
  * TO BE DONE   	
  */
+	static Machines machine = new Machines();
+	Client client = ClientBuilder.newClient();	
+	private static final String cashierUrl = machine.getCashier();
+	
+	  public  Order getOrderId(){
+	    	
+	    	Order  response = client
+	  	          .target(cashierUrl)
+	  	          .request(MediaType.APPLICATION_JSON)
+	  	          .header("content-type", MediaType.APPLICATION_JSON)
+	  	          .get(Order.class);
+	    	
+
+	    	return response;
+	    		
+	    }  
+	
 	
 // Returns all orders from from cashier 	
 	public List<Order> getOrder(){
