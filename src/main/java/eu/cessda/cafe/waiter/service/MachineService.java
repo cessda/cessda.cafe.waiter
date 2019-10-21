@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.service;
+package eu.cessda.cafe.waiter.service;
 
 /*
  * Java Engine class to process logic on /configure end point 
@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.cessda.cafe.waiter.data.model.Machines;
-import org.cessda.cafe.waiter.database.DatabaseClass;
+import eu.cessda.cafe.waiter.data.model.Machines;
+import eu.cessda.cafe.waiter.database.DatabaseClass;
 
 public class MachineService {
 	
-	private Map<String, Machines> machines = DatabaseClass.getMachines();
+	private final Map<String, Machines> machines = DatabaseClass.getMachines();
 
 // MachineService class construct method	
 	public MachineService() {
@@ -23,7 +23,7 @@ public class MachineService {
 // Returns configured coffee and cashier configurations
 	public List<Machines> getMachines(){
 		
-		return new ArrayList<Machines>(machines.values());
+		return new ArrayList<>(machines.values());
 	}
 	
 // Post configurations of coffee and cashier machines

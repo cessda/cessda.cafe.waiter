@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
 /*
  * Coffee Product enumeration list 

@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.resource;
+package eu.cessda.cafe.waiter.resource;
 
 /*
  * Setup the Application path for the program.

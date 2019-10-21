@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.message;
+package eu.cessda.cafe.waiter.message;
 
 /*
  * Class TO BE DELETED !!!!

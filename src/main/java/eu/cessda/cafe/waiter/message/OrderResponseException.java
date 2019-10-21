@@ -1,10 +1,10 @@
-package org.cessda.cafe.waiter.message;
+package eu.cessda.cafe.waiter.message;
 
 /*
  * May BE DELETED !!! Not needed 
  */
 
-public class OrderResponseException extends RuntimeException {
+class OrderResponseException extends RuntimeException {
 
 	/**
 	 * 

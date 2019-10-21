@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.resource;
+package eu.cessda.cafe.waiter.resource;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

@@ -1,23 +1,26 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
-public class ProcessedJobs {
+/*
+ * Java Class to store data from http://cashier/processed-jobs
+ */
+public class JobResponse {
+
 	
-	String  jobId;
-	String product;
-	String orderId;
-	String orderPlaced;
-	int orderSize;
-	String machine;
-	String jobStarted;
+	private String  jobId;
+	private String product;
+	private String orderId;
+	private String orderPlaced;
+	private int orderSize;
+	private String machine;
+	private String jobStarted;
+	
 	
 	public String getJobId() {
 		return jobId;
 	}
-	
 	public void setJobId(String jobId) {
 		this.jobId = jobId;
 	}
-	
 	public String getProduct() {
 		return product;
 	}
@@ -33,36 +36,29 @@ public class ProcessedJobs {
 	public String getOrderPlaced() {
 		return orderPlaced;
 	}
-	
 	public void setOrderPlaced(String orderPlaced) {
 		this.orderPlaced = orderPlaced;
 	}
-	
 	public int getOrderSize() {
 		return orderSize;
 	}
 	public void setOrderSize(int orderSize) {
 		this.orderSize = orderSize;
 	}
-	
 	public String getMachine() {
 		return machine;
 	}
-	
 	public void setMachine(String machine) {
 		this.machine = machine;
 	}
-	
 	public String getJobStarted() {
 		return jobStarted;
 	}
-	
 	public void setJobStarted(String jobStarted) {
 		this.jobStarted = jobStarted;
 	}
-	
-	public ProcessedJobs(String jobId, String product, String orderId, String orderPlaced, int orderSize,
-			String machine, String jobStarted) {
+	public JobResponse(String jobId, String product, String orderId, String orderPlaced, int orderSize, String machine,
+			String jobStarted) {
 		super();
 		this.jobId = jobId;
 		this.product = product;
@@ -72,12 +68,15 @@ public class ProcessedJobs {
 		this.machine = machine;
 		this.jobStarted = jobStarted;
 	}
-	
-	
-	public ProcessedJobs() {
+	public JobResponse() {
 		super();
 	}
-
+	@Override
+	public String toString() {
+		return "JobResponse [jobId=" + jobId + ", product=" + product + ", orderId=" + orderId + ", orderPlaced="
+				+ orderPlaced + ", orderSize=" + orderSize + ", machine=" + machine + ", jobStarted=" + jobStarted
+				+ "]";
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -91,7 +90,6 @@ public class ProcessedJobs {
 		result = prime * result + ((product == null) ? 0 : product.hashCode());
 		return result;
 	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -100,7 +98,7 @@ public class ProcessedJobs {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ProcessedJobs other = (ProcessedJobs) obj;
+		JobResponse other = (JobResponse) obj;
 		if (jobId == null) {
 			if (other.jobId != null)
 				return false;
@@ -129,14 +127,12 @@ public class ProcessedJobs {
 		if (orderSize != other.orderSize)
 			return false;
 		if (product == null) {
-			if (other.product != null)
-				return false;
-		} else if (!product.equals(other.product))
-			return false;
-		return true;
+			return other.product == null;
+		} else return product.equals(other.product);
 	}
 	
 	
 	
+
 
 }

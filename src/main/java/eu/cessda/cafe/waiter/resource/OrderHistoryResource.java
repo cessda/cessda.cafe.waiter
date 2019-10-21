@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.resource;
+package eu.cessda.cafe.waiter.resource;
 
 
 import javax.ws.rs.GET;
@@ -7,7 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.cessda.cafe.waiter.service.OrderHistoryService;
+import eu.cessda.cafe.waiter.service.OrderHistoryService;
 
 /*
  * Java Resource class to expose /order-history end point.
@@ -17,7 +17,7 @@ import org.cessda.cafe.waiter.service.OrderHistoryService;
 @Path("/order-history")
 public class OrderHistoryResource {
 	
-	OrderHistoryService orderHistory = new OrderHistoryService();
+	private final OrderHistoryService orderHistory = new OrderHistoryService();
 			
   
 	@GET

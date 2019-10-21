@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.message;
+package eu.cessda.cafe.waiter.message;
 
 /*
  * Java class to store /collect-jobs Response message 
@@ -7,8 +7,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class CollectJobMessage {
-	int x;
-	int y;
+	private int x;
+	private int y;
 		
 	public CollectJobMessage() {
 		super();

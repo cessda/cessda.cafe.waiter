@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
 /*
  * Java class to keep the hold data for response for /order-retrieve path 
@@ -9,11 +9,11 @@ import java.util.UUID;
 public class Order {
 	
 	
-	public UUID orderId;
-	public Timestamp orderPlaced; 
-	public int ordersize; 
-	public Coffees coffees; 
-	public Timestamp orderDelivered;
+	private UUID orderId;
+	private Timestamp orderPlaced;
+	private int ordersize;
+	private Coffees coffees;
+	private Timestamp orderDelivered;
 	
 	public Order() {
 		super();

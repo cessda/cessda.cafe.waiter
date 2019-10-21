@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
 /*
  * Java Class to store jobs collected from Cashier or Coffee Machine 
@@ -7,16 +7,16 @@ package org.cessda.cafe.waiter.data.model;
 import java.security.Timestamp;
 import java.util.UUID;
 
-public class Job {
-	UUID jobId;
-	Timestamp jobStarted; 
-	UUID orderId; 
-	Timestamp orderPlaced;
-	int orderSize;
-	Machines machine;
-	Product product;
-	Timestamp orderDelivered;
-	Coffees coffees; 
+class Job {
+	private UUID jobId;
+	private Timestamp jobStarted;
+	private UUID orderId;
+	private Timestamp orderPlaced;
+	private int orderSize;
+	private Machines machine;
+	private Product product;
+	private Timestamp orderDelivered;
+	private Coffees coffees;
 	
 	
 	

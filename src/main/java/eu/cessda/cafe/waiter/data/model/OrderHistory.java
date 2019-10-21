@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
 /*
  * Java class to store data for /order-history from the cashier 
@@ -8,20 +8,21 @@ import java.security.Timestamp;
 import java.util.UUID;
 
 public class OrderHistory {
-	UUID jobId;
-	Product product[];
-	UUID orderId; 
-	Timestamp orderPlaced;
-	Timestamp orderDelivered;
-	int orderSize;
-	Machines machine;
-	Timestamp jobstarted; 
-	Timestamp jobRetrieved;
+	private UUID jobId;
+	private Product[] product;
+	private UUID orderId;
+	private Timestamp orderPlaced;
+	private Timestamp orderDelivered;
+	private int orderSize;
+	private Machines machine;
+	private Timestamp jobstarted;
+	private Timestamp jobRetrieved;
 	
 	
 	
 	public OrderHistory() {
-		
+		// No implementation yet
+		throw new UnsupportedOperationException();
 	}
 	
 	public UUID getJobId() {

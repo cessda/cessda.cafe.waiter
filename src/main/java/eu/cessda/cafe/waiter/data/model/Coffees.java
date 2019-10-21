@@ -1,10 +1,10 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
 /*
  * Java class to hold array of coffee product 
  */
 public class Coffees {
-	Product product[];
+	private Product[] product;
 	
 	public Coffees(Product[] product) {
 		super();

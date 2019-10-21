@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.service;
+package eu.cessda.cafe.waiter.service;
 
 import java.util.ArrayList;
 
@@ -9,14 +9,15 @@ import java.util.ArrayList;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
-import org.cessda.cafe.waiter.data.model.JobResponse;
-import org.cessda.cafe.waiter.data.model.Machines;
-import org.cessda.cafe.waiter.data.model.ProcessedJobs;
-import org.cessda.cafe.waiter.message.CollectJobMessage;
+
+import eu.cessda.cafe.waiter.data.model.JobResponse;
+import eu.cessda.cafe.waiter.data.model.Machines;
+import eu.cessda.cafe.waiter.data.model.ProcessedJobs;
+import eu.cessda.cafe.waiter.message.CollectJobMessage;
 
 public class JobService {
 
-static /*
+private static final /*
 	private Map<String, JobResponse> jobResponse = DatabaseClass.getjobResponse();
 	
 // MachineService class construct method	
@@ -34,24 +35,19 @@ static /*
 /* Returns responses on how many jobs collected from /processed-jobs cashier end points 
      * TO BE REVIEWED by Matthew   
 */
-	Machines machine = new Machines();
-	JobResponse collectjobs = new JobResponse();
+        Machines machine = new Machines();
+	private final JobResponse collectjobs = new JobResponse();
 	ProcessedJobs processedjobs = new ProcessedJobs();
-	Client client = ClientBuilder.newClient();	
+	private final Client client = ClientBuilder.newClient();
 	private static final String cashierUrl = machine.getCashier();
 	
 	
-    public  ProcessedJobs getProcessedJobs(){
-    	
-    	ProcessedJobs response = client
-  	          .target(cashierUrl)
-  	          .request(MediaType.APPLICATION_JSON)
-  	          .header("content-type", MediaType.APPLICATION_JSON)
-  	          .get(ProcessedJobs.class);
-    	
-
-    	return response;
-    		
+    private ProcessedJobs getProcessedJobs(){
+		return client
+				.target(cashierUrl)
+				.request(MediaType.APPLICATION_JSON)
+				.header("content-type", MediaType.APPLICATION_JSON)
+				.get(ProcessedJobs.class);
     }  
     	
     
@@ -62,8 +58,8 @@ static /*
     	int x = 0;
     	int y = 0;
     	
-    	CollectJobMessage collectResponse = new CollectJobMessage();		
-    	ArrayList<ProcessedJobs> processJob = new ArrayList<ProcessedJobs>();
+    	CollectJobMessage collectResponse = new CollectJobMessage();
+    	ArrayList<ProcessedJobs> processJob = new ArrayList<>();
     	getProcessedJobs();
     	
     	for ( ProcessedJobs jobs : processJob) {

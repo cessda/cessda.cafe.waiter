@@ -1,4 +1,4 @@
-package org.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.data.model;
 
 /*
  * Java class to keep coffee machine and cashier end points configurations  
@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Machines {
-	String machineId;
-	String coffeeMachine;
-	String cashier;
+	private String machineId;
+	private String coffeeMachine;
+	private String cashier;
 	
 
 
