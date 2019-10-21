@@ -65,12 +65,6 @@ pipeline {
             when { branch 'master' }
         }
         stage('Build and Push Docker Image') {
-            agent {
-                docker {
-                    image 'maven:3-jdk-11'
-                    reuseNode true
-                }
-            }
             steps {
                 sh 'gcloud auth configure-docker'
                 withMaven {
