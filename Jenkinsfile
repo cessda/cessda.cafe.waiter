@@ -14,37 +14,45 @@ pipeline {
 
     stages {
         // Building on master
-		stage('Build Project') {
-			steps {
-                withMaven {
-                    sh 'mvn clean install'
-				}
-			}
-            when { branch 'master' }
-		}
-        // Not running on master - test only (for PRs and integration branches)
-		stage('Test Project') {
-			steps {
-                withMaven {
-                    sh 'mvn clean test'
-				}
-			}
-            when { not { branch 'master' } }
-		}
-		stage('Record Issues') {
-			steps {
-				recordIssues(tools: [java()])
-			}
-		}
-        stage('Run Sonar Scan') {
-            steps {
-                withSonarQubeEnv('cessda-sonar') {
-                    withMaven {
-                        sh 'mvn sonar:sonar'
-                    }
+        stage('Pull SDK Docker Image') {
+            agent {
+                docker {
+                    image 'maven:3-jdk-11'
+                    reuseNode true
                 }
             }
-            when { branch 'master' }
+            stage('Build Project') {
+                steps {
+                    withMaven {
+                        sh 'export PATH=$MVN_CMD_DIR:$PATH && mvn clean install'
+                    }
+                }
+                when { branch 'master' }
+            }
+            // Not running on master - test only (for PRs and integration branches)
+            stage('Test Project') {
+                steps {
+                    withMaven {
+                        sh 'export PATH=$MVN_CMD_DIR:$PATH && mvn clean test'
+                    }
+                }
+                when { not { branch 'master' } }
+            }
+            stage('Record Issues') {
+                steps {
+                    recordIssues(tools: [java()])
+                }
+            }
+            stage('Run Sonar Scan') {
+                steps {
+                    withSonarQubeEnv('cessda-sonar') {
+                        withMaven {
+                            sh 'export PATH=$MVN_CMD_DIR:$PATH && mvn sonar:sonar'
+                        }
+                    }
+                }
+                when { branch 'master' }
+            }
         }
         stage("Get Sonar Quality Gate") {
             steps {
@@ -55,10 +63,16 @@ pipeline {
             when { branch 'master' }
         }
         stage('Build and Push Docker Image') {
+            agent {
+                docker {
+                    image 'maven:3-jdk-11'
+                    reuseNode true
+                }
+            }
             steps {
                 sh 'gcloud auth configure-docker'
                 withMaven {
-                    sh "mvn jib:build -Djib.console=plain -Dimage=${image_tag}"
+                    sh "export PATH=$MVN_CMD_DIR:$PATH && mvn jib:build -Djib.console=plain -Dimage=${image_tag}"
                 }
                 sh("gcloud container images add-tag ${IMAGE_TAG} ${docker_repo}/${product_name}-${module_name}:${env.BRANCH_NAME}-latest")
             }
