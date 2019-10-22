@@ -8,11 +8,14 @@
     <packaging>war</packaging>
     <version>0.1.0-SNAPSHOT</version>
     <name>CESSDA Café: Waiter</name>
+    <description>Waiter implementaion of the CESSDA Coffee API</description>
+    <url>https://bitbucket.org/cessda/cessda.cafe/src/master/index.md</url>
 
     <properties>
         <jersey.version>2.29.1</jersey.version>
         <log4j.version>2.12.1</log4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
     </properties>
 
     <build>
@@ -50,6 +53,12 @@
                 <configuration>
                     <to><image>cessda/${project.artifactId}:${project.version}</image></to>
                 </configuration>
+            </plugin>
+            <!--SonarQube Support-->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -108,4 +117,23 @@
             <artifactId>log4j-core</artifactId>
         </dependency>
     </dependencies>
+
+    <organization>
+    	<name>CESSDA ERIC</name>
+    	<url>https://www.cessda.eu/</url>
+    </organization>
+
+    <ciManagement>
+    	<url>https://jenkins-dev.cessda.eu/job/cessda.cafe.waiter/</url>
+    	<system>Jenkins</system>
+    </ciManagement>
+
+    <issueManagement>
+    	<system>Bitbucket</system>
+    	<url>https://bitbucket.org/cessda/cessda.cafe.waiter/issues</url>
+    </issueManagement>
+
+    <scm>
+    	<url>https://bitbucket.org/cessda/cessda.cafe.waiter.git/</url>
+    </scm>
 </project>
