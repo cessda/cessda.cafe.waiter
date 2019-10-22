@@ -39,7 +39,8 @@ private static final /*
 	private final JobResponse collectjobs = new JobResponse();
 	ProcessedJobs processedjobs = new ProcessedJobs();
 	private final Client client = ClientBuilder.newClient();
-	private static final String cashierUrl = machine.getCashier();
+	//private static final String cashierUrl = machine.getCashier();
+	private static final String cashierUrl = "http://localhost:1336/processed-jobs";
 	
 	
     private ProcessedJobs getProcessedJobs(){
