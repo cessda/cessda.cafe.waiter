@@ -8,6 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import eu.cessda.cafe.waiter.service.OrderService;
+
 
 /*
  * Java Resource class to expose /retrieve/orderId end point.
@@ -18,12 +20,18 @@ import javax.ws.rs.core.Response;
 @Path("/retrieve")
 public class OrderResource {
 	
+	OrderService orderService = new OrderService();
 	
 	@GET
 	@Path("/{orderId}")
 	public Response  getOrder(@PathParam("orderId") String orderId ) {
 		
-		return Response.ok().build();
+		 if(orderId == null || orderId.trim().length() == 0) {
+		        return Response.serverError().entity("OrderId cannot be blank").build();
+		    }
+		 
+		return Response.ok()
+				.entity(orderService.getSpecificOrder(orderId))
+				.build();
 	}
-		
 }

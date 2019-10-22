@@ -12,7 +12,7 @@ public class Order {
 	private UUID orderId;
 	private Timestamp orderPlaced;
 	private int ordersize;
-	private Coffees coffees;
+	private Coffees[] coffees;
 	private Timestamp orderDelivered;
 	
 	public Order() {
@@ -42,10 +42,10 @@ public class Order {
 	public void setOrdersize(int ordersize) {
 		this.ordersize = ordersize;
 	}
-	public Coffees getCoffees() {
+	public Coffees[] getCoffees() {
 		return coffees;
 	}
-	public void setCoffees(Coffees coffees) {
+	public void setCoffees(Coffees[] coffees) {
 		this.coffees = coffees;
 	}
 	public Timestamp getOrderDelivered() {
