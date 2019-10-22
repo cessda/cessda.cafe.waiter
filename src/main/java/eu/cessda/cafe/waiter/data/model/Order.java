@@ -1,39 +1,33 @@
 package eu.cessda.cafe.waiter.data.model;
 
-/*
- * Java class to keep the hold data for response for /order-retrieve path 
- */
-import java.security.Timestamp;
-import java.util.UUID;
-
 public class Order {
 	
 	
-	private UUID orderId;
-	private Timestamp orderPlaced;
+	private String orderId;
+	private String orderPlaced;
 	private int ordersize;
 	private Coffees[] coffees;
-	private Timestamp orderDelivered;
+	private String orderDelivered;
 	
 	public Order() {
 		super();
 	}
 	
-	public Order(UUID orderId) {
+	public Order(String orderId) {
 		super();
 		this.orderId = orderId;
 	}
 
-	public UUID getOrderId() {
+	public String getOrderId() {
 		return orderId;
 	}
-	public void setOrderId(UUID orderId) {
+	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
-	public Timestamp getOrderPlaced() {
+	public String getOrderPlaced() {
 		return orderPlaced;
 	}
-	public void setOrderPlaced(Timestamp orderPlaced) {
+	public void setOrderPlaced(String orderPlaced) {
 		this.orderPlaced = orderPlaced;
 	}
 	public int getOrdersize() {
@@ -48,13 +42,12 @@ public class Order {
 	public void setCoffees(Coffees[] coffees) {
 		this.coffees = coffees;
 	}
-	public Timestamp getOrderDelivered() {
+	public String getOrderDelivered() {
 		return orderDelivered;
 	}
-	public void setOrderDelivered(Timestamp orderDelivered) {
-		this.orderDelivered = orderDelivered;
+	public void setOrderDelivered(String now) {
+		this.orderDelivered = now;
 	}
-	
 	
 	
 

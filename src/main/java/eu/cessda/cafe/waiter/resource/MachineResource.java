@@ -26,7 +26,8 @@ public class MachineResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getMachines() {
-		return Response.ok(machineService.getMachines()).build();
+		return Response.ok(machineService.getMachines())
+				.build();
 	}
 	
 //   Configure end-points for Coffee machine and Cashier 
@@ -35,7 +36,10 @@ public class MachineResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response postMachine(Machines machine) {
 		machineService.postMachines(machine);
-		return Response.status(201).entity(machine).build();
+		return Response
+				.status(201)
+				.entity(machine)
+				.build();
 	}
 	
 //  Remove end-points for configured Coffee machine and Cashier	
