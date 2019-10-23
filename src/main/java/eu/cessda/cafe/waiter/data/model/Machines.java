@@ -15,7 +15,6 @@ public class Machines {
 
 
 	public Machines(String machineId, String cashier, String coffeeMachine) {
-		// TODO Auto-generated constructor stub
 		this.machineId = machineId;
 		this.cashier = cashier;
 		this.coffeeMachine = coffeeMachine;

@@ -4,19 +4,18 @@ package eu.cessda.cafe.waiter.data.model;
  * Java class to store data for /order-history from the cashier 
  */
 
-import java.security.Timestamp;
-import java.util.UUID;
+import java.util.Arrays;
 
 public class OrderHistory {
-	private UUID jobId;
+	private String jobId;
 	private Product[] product;
-	private UUID orderId;
-	private Timestamp orderPlaced;
-	private Timestamp orderDelivered;
+	private String orderId;
+	private String orderPlaced;
+	private String orderDelivered;
 	private int orderSize;
-	private Machines machine;
-	private Timestamp jobstarted;
-	private Timestamp jobRetrieved;
+	private String machine;
+	private String jobstarted;
+	private String jobRetrieved;
 	
 	
 	
@@ -25,10 +24,10 @@ public class OrderHistory {
 		throw new UnsupportedOperationException();
 	}
 	
-	public UUID getJobId() {
+	public String getJobId() {
 		return jobId;
 	}
-	public void setJobId(UUID jobId) {
+	public void setJobId(String jobId) {
 		this.jobId = jobId;
 	}
 	public Product[] getProduct() {
@@ -37,22 +36,22 @@ public class OrderHistory {
 	public void setProduct(Product[] product) {
 		this.product = product;
 	}
-	public UUID getOrderId() {
+	public String getOrderId() {
 		return orderId;
 	}
-	public void setOrderId(UUID orderId) {
+	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
-	public Timestamp getOrderPlaced() {
+	public String getOrderPlaced() {
 		return orderPlaced;
 	}
-	public void setOrderPlaced(Timestamp orderPlaced) {
+	public void setOrderPlaced(String orderPlaced) {
 		this.orderPlaced = orderPlaced;
 	}
-	public Timestamp getOrderDelivered() {
+	public String getOrderDelivered() {
 		return orderDelivered;
 	}
-	public void setOrderDelivered(Timestamp orderDelivered) {
+	public void setOrderDelivered(String orderDelivered) {
 		this.orderDelivered = orderDelivered;
 	}
 	public int getOrderSize() {
@@ -61,25 +60,47 @@ public class OrderHistory {
 	public void setOrderSize(int orderSize) {
 		this.orderSize = orderSize;
 	}
-	public Machines getMachine() {
+	public String getMachine() {
 		return machine;
 	}
-	public void setMachine(Machines machine) {
+	public void setMachine(String machine) {
 		this.machine = machine;
 	}
-	public Timestamp getJobstarted() {
+	public String getJobstarted() {
 		return jobstarted;
 	}
-	public void setJobstarted(Timestamp jobstarted) {
+	public void setJobstarted(String jobstarted) {
 		this.jobstarted = jobstarted;
 	}
-	public Timestamp getJobRetrieved() {
+	public String getJobRetrieved() {
 		return jobRetrieved;
 	}
-	public void setJobRetrieved(Timestamp jobRetrieved) {
+	public void setJobRetrieved(String jobRetrieved) {
 		this.jobRetrieved = jobRetrieved;
 	}
 	
 	
-    
+
+	public OrderHistory(String orderId, String jobId, Product[] product, String orderPlaced, String orderDelivered,
+			int orderSize, String machine, String jobstarted, String jobRetrieved) {
+		super();
+		this.orderId = orderId;
+		this.jobId = jobId;
+		this.product = product;
+		this.orderPlaced = orderPlaced;
+		this.orderDelivered = orderDelivered;
+		this.orderSize = orderSize;
+		this.machine = machine;
+		this.jobstarted = jobstarted;
+		this.jobRetrieved = jobRetrieved;
+	}
+
+	@Override
+	public String toString() {
+		return "OrderHistory [orderId=" + orderId + ", jobId=" + jobId + ", product=" + Arrays.toString(product)
+				+ ", orderPlaced=" + orderPlaced + ", orderDelivered=" + orderDelivered + ", orderSize=" + orderSize
+				+ ", machine=" + machine + ", jobstarted=" + jobstarted + ", jobRetrieved=" + jobRetrieved + "]";
+	}
+
+	
 }
