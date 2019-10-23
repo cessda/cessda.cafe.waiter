@@ -1,7 +1,6 @@
 package eu.cessda.cafe.waiter.service;
 
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 /*
@@ -9,35 +8,35 @@ import java.text.SimpleDateFormat;
  */
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.cessda.cafe.waiter.data.model.Order;
+import eu.cessda.cafe.waiter.data.model.Product;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
-import eu.cessda.cafe.waiter.message.RetrieveOrderMessage;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 public class OrderService {
-
-	private static final Logger log = LogManager.getLogger(OrderService.class);
     
+	Product product1 = Product.CAPPUCCINO;
+	Product product2 = Product.COFFEE;
+	Product product3 = Product.KAKAO;		
+	
+	
+	private static final Logger log = LogManager.getLogger(OrderService.class);
+  
 	
 	private final Map<String, Order> orderList = DatabaseClass.getOrder();
 	Order order = new Order();
+		
 
 	// OrderService class construct
 	public OrderService() {
-		// No implementation yet
-	}
-
+		orderList.put("00000000-FFFF-FFFF-FFFF-000000000000", new Order("00000000-FFFF-FFFF-FFFF-000000000000", "2019-07-31T01:00:00.000Z", 2, new Product[] {product1,product2} , "2019-07-31T01:00:01.000Z"));
+		orderList.put("00000000-AAAA-AAAA-AAAA-000000000000", new Order("00000000-AAAA-AAAA-AAAA-000000000000", "2019-07-31T01:00:00.000Z", 2, new Product[] {product2,product3} , ""));	
+	    orderList.put("00000000-BBBB-BBBB-BBBB-000000000000", new Order("00000000-BBBB-BBBB-BBBB-000000000000", "2019-07-31T01:00:00.000Z", 3, new Product[] {product1,product3} , ""));
+	    }
 
     
 
@@ -49,12 +48,15 @@ public class OrderService {
 
 	public Order getSpecificOrder(String orderId) {
 		
-		SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
+		SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd'T01:'HH:mm:ss'Z'");
 		Date date = new Date(System.currentTimeMillis());
 		String now = formatter.format(date);
 	
 		// update Order delivery date (time)
-		order.setOrderDelivered(now);
+		orderList.get(orderId).setOrderDelivered(now);
+		
+        log.debug("Order Delivery updated", orderId);
+        
 		return orderList.get(orderId);
 
 		}	

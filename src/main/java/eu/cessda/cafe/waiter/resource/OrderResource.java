@@ -44,27 +44,28 @@ public class OrderResource {
 /* Returns responses for specific order based on conditions
  * 
 */
-	boolean ans = orderList.containsKey(orderId);
+		 
+	      boolean ans = orderList.containsKey(orderId);
 			
 			
 		// check conditions whether any open jobs are done and orders delivered	
 		
-			if (!ans) {
+			if (ans == false) {
 				RetrieveOrderMessage message1 = new RetrieveOrderMessage(condition1);
 				return Response
 						.status(400)
 						.entity(message1)
 						.build();	
 			} else {
-
-				if (order.getCoffees().length != order.getOrdersize()) {
+				
+				if ( orderList.get(orderId).getCoffees().length != orderList.get(orderId).getOrdersize()) {
 					RetrieveOrderMessage message2 = new RetrieveOrderMessage(condition2);
 					return Response
 							.status(400)
 							.entity(message2)
 							.build();	
 				} else  {
-					if (order.getOrderDelivered() != null) {
+					if (orderList.get(orderId).getOrderDelivered() != "") {
 					RetrieveOrderMessage message3 = new RetrieveOrderMessage(condition3);	
 					return Response
 							.status(400)
@@ -75,7 +76,8 @@ public class OrderResource {
 								.entity(orderService.getSpecificOrder(orderId))
 								.build();
 					} 
-			}	
+			} 
+
 				
 		}
 	}

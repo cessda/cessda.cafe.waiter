@@ -1,12 +1,14 @@
 package eu.cessda.cafe.waiter.data.model;
 
+import java.util.Arrays;
+
 public class Order {
 	
 	
 	private String orderId;
 	private String orderPlaced;
 	private int ordersize;
-	private Coffees[] coffees;
+	private Product[] coffees;
 	private String orderDelivered;
 	
 	public Order() {
@@ -36,10 +38,10 @@ public class Order {
 	public void setOrdersize(int ordersize) {
 		this.ordersize = ordersize;
 	}
-	public Coffees[] getCoffees() {
+	public Product[] getCoffees() {
 		return coffees;
 	}
-	public void setCoffees(Coffees[] coffees) {
+	public void setCoffees(Product[] coffees) {
 		this.coffees = coffees;
 	}
 	public String getOrderDelivered() {
@@ -47,6 +49,21 @@ public class Order {
 	}
 	public void setOrderDelivered(String now) {
 		this.orderDelivered = now;
+	}
+
+	public Order(String orderId, String orderPlaced, int ordersize, Product[] coffees, String orderDelivered) {
+		super();
+		this.orderId = orderId;
+		this.orderPlaced = orderPlaced;
+		this.ordersize = ordersize;
+		this.coffees = coffees;
+		this.orderDelivered = orderDelivered;
+	}
+
+	@Override
+	public String toString() {
+		return "Order [orderId=" + orderId + ", orderPlaced=" + orderPlaced + ", ordersize=" + ordersize + ", coffees="
+				+ Arrays.toString(coffees) + ", orderDelivered=" + orderDelivered + "]";
 	}
 	
 	
