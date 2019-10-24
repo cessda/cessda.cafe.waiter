@@ -1,9 +1,11 @@
 package eu.cessda.cafe.waiter.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.JobResponse;
 import eu.cessda.cafe.waiter.data.model.Machines;
-import eu.cessda.cafe.waiter.data.model.ProcessedJobs;
+import eu.cessda.cafe.waiter.data.model.ProcessedJob;
+import eu.cessda.cafe.waiter.engine.Cashier;
+import eu.cessda.cafe.waiter.engine.CoffeeMachine;
 import eu.cessda.cafe.waiter.message.CollectJobMessage;
 import lombok.extern.log4j.Log4j2;
 
@@ -12,7 +14,6 @@ import javax.ws.rs.client.ClientBuilder;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 /*
  * Java Engine class to process logic on /collect-jobs end point
@@ -41,38 +42,31 @@ public class JobService {
 */
     Machines machine = new Machines();
     private final JobResponse collectJobs = new JobResponse();
-    ProcessedJobs processedjobs = new ProcessedJobs();
     private final Client client = ClientBuilder.newClient();
     //private static final String cashierUrl = machine.getCashier();
-    private final URL processedJobsEndpoint;
+    private final URL cashierUrl;
 
     public JobService() {
         try {
-            var cashierUrl = new URL("http://localhost:5000/");
-            processedJobsEndpoint = new URL(cashierUrl, "processed-jobs");
+            cashierUrl = new URL("http://localhost:5000/");
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
     }
 
-
-    private ProcessedJobs getProcessedJobs() throws IOException {
-        return new ObjectMapper().readValue(processedJobsEndpoint, ProcessedJobs.class);
-    }
-
-
-    public String collectJobsMessage(){
-
+    public ApiMessage collectJobsMessage() {
 
         int x = 0;
         int y = 0;
 
         CollectJobMessage collectResponse = new CollectJobMessage();
-        ArrayList<ProcessedJobs> processJob = new ArrayList<>();
         try {
-            var processedJobs = getProcessedJobs();
-            for (ProcessedJobs jobs : processJob) {
-                boolean isHashcodeEquals = jobs.hashCode() == collectJobs.hashCode();
+            var processedJobs = new Cashier(cashierUrl).getProcessedJobs();
+            log.trace(processedJobs);
+            for (ProcessedJob job : processedJobs) {
+                // Start processing the job if not processed
+                new CoffeeMachine(job.getMachine()).retrieveJob(job.getJobId());
+                boolean isHashcodeEquals = job.hashCode() == collectJobs.hashCode();
                 if (isHashcodeEquals) {
                     x++;
                 } else {
@@ -81,16 +75,12 @@ public class JobService {
             }
             collectResponse.setX(x);
             collectResponse.setY(y);
-            return collectResponse.toString();
+            return new ApiMessage(collectResponse.toString());
         } catch (IOException e) {
             log.error("Connection error:", e);
+            return new ApiMessage("Error connecting to " + cashierUrl);
         }
-
-        return "";
-
     }
-
-
 }
 
 

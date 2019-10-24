@@ -15,28 +15,29 @@ import java.util.UUID;
 @Log4j2
 public class CoffeeMachine {
 
+    private final URL coffeeMachineUrl;
+
+    public CoffeeMachine(URL coffeeMachineUrl) {
+        this.coffeeMachineUrl = coffeeMachineUrl;
+    }
+
     public void retrieveOrder(UUID orderId) {
         log.info("Retrieving order: {}", orderId);
 
         // A foreach loop selecting each job
         var jobId = UUID.fromString("c1be03bf-d9cc-486b-92af-3d91c27d3ba5");
-        try {
-            var coffeeMachine = new URL("http://localhost:1337/");
-            retrieveJob(jobId, coffeeMachine);
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException(e);
-        }
+        retrieveJob(jobId);
     }
 
-    private void retrieveJob(UUID id, URL coffeeMachine) {
+    public void retrieveJob(UUID id) {
         // START
         log.info("Retrieving Job {}", id);
 
         // Get all coffee machines (or better, get the associated coffee machine)
         try {
             // Set the connection url
-            log.info("Connecting to coffee machine {}", coffeeMachine);
-            var retrieveJobUrl = new URL(coffeeMachine, "/retrieve-job/" + id);
+            log.info("Connecting to coffee machine {}", coffeeMachineUrl);
+            var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
 
             // Get the response
             var responseMap = new ObjectMapper().readValue(retrieveJobUrl, Response.class);
@@ -47,7 +48,7 @@ public class CoffeeMachine {
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);
         } catch (IOException e) {
-            log.error("Error connecting to {}", coffeeMachine, e);
+            log.error("Error connecting to {}", coffeeMachineUrl, e);
         }
     }
 
