@@ -74,11 +74,11 @@ pipeline {
             }
             when { branch 'master' }
         }
-        /*stage('Deploy Docker Image') {
+        stage('Deploy Docker Image') {
             steps {
                 build job: '../cessda.cafe.deployment/master', parameters: [string(name: 'waiter_image_tag', value: "${image_tag}"), string(name: 'module', value: 'waiter')], wait: false
             }
             when { branch 'master' }
-        }*/
+        }
     }
 }

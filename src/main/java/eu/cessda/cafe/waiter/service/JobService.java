@@ -1,23 +1,27 @@
 package eu.cessda.cafe.waiter.service;
 
-import java.util.ArrayList;
-
-/*
- * Java Engine class to process logic on /collect-jobs end point 
- */
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.data.model.JobResponse;
 import eu.cessda.cafe.waiter.data.model.Machines;
 import eu.cessda.cafe.waiter.data.model.ProcessedJobs;
 import eu.cessda.cafe.waiter.message.CollectJobMessage;
+import lombok.extern.log4j.Log4j2;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+
+/*
+ * Java Engine class to process logic on /collect-jobs end point
+ */
+
+@Log4j2
 public class JobService {
 
-private static final /*
+/*
 	private Map<String, JobResponse> jobResponse = DatabaseClass.getjobResponse();
 	
 // MachineService class construct method	
@@ -32,55 +36,61 @@ private static final /*
 */
 
 
-/* Returns responses on how many jobs collected from /processed-jobs cashier end points 
+    /* Returns responses on how many jobs collected from /processed-jobs cashier end points
      * TO BE REVIEWED by Matthew   
 */
-        Machines machine = new Machines();
-	private final JobResponse collectjobs = new JobResponse();
-	ProcessedJobs processedjobs = new ProcessedJobs();
-	private final Client client = ClientBuilder.newClient();
-	//private static final String cashierUrl = machine.getCashier();
-	private static final String cashierUrl = "http://localhost:1336/processed-jobs";
-	
-	
-    private ProcessedJobs getProcessedJobs(){
-		return client
-				.target(cashierUrl)
-				.request(MediaType.APPLICATION_JSON)
-				.header("content-type", MediaType.APPLICATION_JSON)
-				.get(ProcessedJobs.class);
-    }  
-    	
-    
-   
-    public String collectJobsMessage(){	
-    	
-    	
-    	int x = 0;
-    	int y = 0;
-    	
-    	CollectJobMessage collectResponse = new CollectJobMessage();
-    	ArrayList<ProcessedJobs> processJob = new ArrayList<>();
-    	getProcessedJobs();
-    	
-    	for ( ProcessedJobs jobs : processJob) {
-    		boolean isHashcodeEquals = jobs.hashCode() == collectjobs.hashCode();
-    		if (isHashcodeEquals) {
-    			x++;
-    		} else {
-    			y++;
-    		}          
-  }
-    	
-    	collectResponse.setX(x);
-    	collectResponse.setY(y);
-    	
-    	return collectResponse.toString();
+    Machines machine = new Machines();
+    private final JobResponse collectJobs = new JobResponse();
+    ProcessedJobs processedjobs = new ProcessedJobs();
+    private final Client client = ClientBuilder.newClient();
+    //private static final String cashierUrl = machine.getCashier();
+    private final URL processedJobsEndpoint;
 
-	}
-			
-	
-	        
+    public JobService() {
+        try {
+            var cashierUrl = new URL("http://localhost:5000/");
+            processedJobsEndpoint = new URL(cashierUrl, "processed-jobs");
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+
+    private ProcessedJobs getProcessedJobs() throws IOException {
+        return new ObjectMapper().readValue(processedJobsEndpoint, ProcessedJobs.class);
+    }
+
+
+    public String collectJobsMessage(){
+
+
+        int x = 0;
+        int y = 0;
+
+        CollectJobMessage collectResponse = new CollectJobMessage();
+        ArrayList<ProcessedJobs> processJob = new ArrayList<>();
+        try {
+            var processedJobs = getProcessedJobs();
+            for (ProcessedJobs jobs : processJob) {
+                boolean isHashcodeEquals = jobs.hashCode() == collectJobs.hashCode();
+                if (isHashcodeEquals) {
+                    x++;
+                } else {
+                    y++;
+                }
+            }
+            collectResponse.setX(x);
+            collectResponse.setY(y);
+            return collectResponse.toString();
+        } catch (IOException e) {
+            log.error("Connection error:", e);
+        }
+
+        return "";
+
+    }
+
+
 }
 
 
