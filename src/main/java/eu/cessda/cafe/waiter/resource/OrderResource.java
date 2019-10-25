@@ -54,7 +54,7 @@ public class OrderResource {
 						.build();	
 			} else {
 
-			if (orderList.get(orderId).getCoffees().length != orderList.get(orderId).getOrderSize()) {
+			if (orderList.get(orderId).getCoffees().length != orderList.get(orderId).getOrdersize()) {
 				var message2 = new ApiMessage(ORDER_NOT_READY);
 					return Response
 							.status(400)
