@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -11,23 +12,30 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
+/**
+ * Holds methods to talk to remote coffee machines
+ */
 @Log4j2
 public class CoffeeMachine {
 
+    @NonNull
     private final URL coffeeMachineUrl;
 
+    /**
+     * Constructor, sets up the remote coffee machine
+     *
+     * @param coffeeMachineUrl The URL of the coffee machine.
+     */
     public CoffeeMachine(URL coffeeMachineUrl) {
         this.coffeeMachineUrl = coffeeMachineUrl;
     }
 
-    public void retrieveOrder(UUID orderId) {
-        log.info("Retrieving order: {}", orderId);
-
-        // A foreach loop selecting each job
-        var jobId = UUID.fromString("c1be03bf-d9cc-486b-92af-3d91c27d3ba5");
-        retrieveJob(jobId);
-    }
-
+    /**
+     * Attempt to retrieve the specified job from the remote coffee machine
+     *
+     * @param id The UUID of the coffee to retrieve
+     * @return The response from the remote coffee machine, or null if an error occurred
+     */
     public CoffeeMachineResponse retrieveJob(UUID id) {
         // START
         log.info("Retrieving Job {}", id);

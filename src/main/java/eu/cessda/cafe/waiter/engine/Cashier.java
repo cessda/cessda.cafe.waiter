@@ -21,6 +21,12 @@ public class Cashier {
         }
     }
 
+    /**
+     * Retrieve a list of processed jobs from the cashier
+     *
+     * @return List of processed jobs
+     * @throws IOException if a problem occurs getting the processed jobs
+     */
     public List<ProcessedJobResponse> getProcessedJobs() throws IOException {
         return new ObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<ProcessedJobResponse>>() {
         });

@@ -47,25 +47,25 @@ public class OrderResource {
 		// check conditions whether any open jobs are done and orders delivered	
 
 		if (!ans) {
-			var message1 = new ApiMessage(ORDER_UNKNOWN);
+            var orderUnknownMessage = new ApiMessage(ORDER_UNKNOWN);
 				return Response
 						.status(400)
-						.entity(message1)
+                        .entity(orderUnknownMessage)
 						.build();	
 			} else {
 
 			if (orderList.get(orderId).getCoffees().length != orderList.get(orderId).getOrdersize()) {
-				var message2 = new ApiMessage(ORDER_NOT_READY);
+                var orderNotReadyMessage = new ApiMessage(ORDER_NOT_READY);
 					return Response
 							.status(400)
-							.entity(message2)
+                            .entity(orderNotReadyMessage)
 							.build();	
 				} else  {
 				if (!orderList.get(orderId).getOrderDelivered().equals("")) {
-					var message3 = new ApiMessage(ORDER_ALREADY_DELIVERED);
+                    var orderAlreadyDeliveredMessage = new ApiMessage(ORDER_ALREADY_DELIVERED);
 					return Response
 							.status(400)
-							.entity(message3)
+                            .entity(orderAlreadyDeliveredMessage)
 							.build();
 					} else {  
 						return Response.ok()

@@ -7,7 +7,6 @@ import eu.cessda.cafe.waiter.data.model.Machines;
 import eu.cessda.cafe.waiter.data.response.ProcessedJobResponse;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.engine.CoffeeMachine;
-import eu.cessda.cafe.waiter.message.CollectJobMessage;
 import lombok.extern.log4j.Log4j2;
 
 import javax.ws.rs.client.Client;
@@ -60,7 +59,6 @@ public class JobService {
         int x = 0;
         int y = 0;
 
-        CollectJobMessage collectResponse = new CollectJobMessage();
         try {
             var processedJobs = new Cashier(cashierUrl).getProcessedJobs();
             if (log.isTraceEnabled()) log.trace(processedJobs);
@@ -82,9 +80,7 @@ public class JobService {
                     y++;
                 }
             }
-            collectResponse.setX(x);
-            collectResponse.setY(y);
-            return new ApiMessage(collectResponse.toString());
+            return ApiMessage.collectJobMessage(x, y);
         } catch (IOException e) {
             log.error("Error connecting to {}: {}", cashierUrl, e.getMessage());
             return new ApiMessage("Error connecting to Cashier " + cashierUrl);
