@@ -10,9 +10,19 @@ import lombok.NonNull;
 public class ApiMessage {
 
     // Prevent messages from being modified after creation
+    /**
+     * The message to store
+     */
     @NonNull
     private final String message;
 
+    /**
+     * Collected jobs message
+     *
+     * @param jobsCollected    Jobs collected
+     * @param jobsNotCollected Jobs not collected
+     * @return The message
+     */
     public static ApiMessage collectJobMessage(int jobsCollected, int jobsNotCollected) {
         String message = jobsCollected + " job(s) collected" + ", still waiting for " + jobsNotCollected + " job(s).";
         return new ApiMessage(message);
