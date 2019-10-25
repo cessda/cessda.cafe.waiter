@@ -1,7 +1,7 @@
 # CESSDA Café: Waiter
 
 [![Build Status](https://jenkins-dev.cessda.eu/buildStatus/icon?job=cessda.cafe.waiter%2Fmaster)](https://jenkins-dev.cessda.eu/job/cessda.cafe.waiter/job/master/)
-[![Quality Gate Status](https://sonarqube.cessda.eu/api/project_badges/measure?project=eu.cessda.pasc.devops%3Apasc-generic-spring-boot-admin&metric=alert_status)](https://sonarqube-dev.cessda.eu/dashboard?id=eu.cessda.cafe%3Awaiter)
+[![Quality Gate Status](https://sonarqube-dev.cessda.eu/component_measures?id=eu.cessda.cafe%3Awaiter&metric=alert_status)](https://sonarqube-dev.cessda.eu/dashboard?id=eu.cessda.cafe%3Awaiter)
 
 
 
