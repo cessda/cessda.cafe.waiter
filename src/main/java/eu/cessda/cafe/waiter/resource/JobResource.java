@@ -25,7 +25,7 @@ public class JobResource {
 	public Response postCollectJobs() {
 		// TODO: Cashier code
 
-		return Response.ok(jobService.collectJobsMessage()).build();
+        return Response.ok(jobService.collectJobs()).build();
 		
 	}
 }

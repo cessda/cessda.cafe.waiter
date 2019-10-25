@@ -2,7 +2,7 @@ package eu.cessda.cafe.waiter.engine;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.cessda.cafe.waiter.data.model.ProcessedJob;
+import eu.cessda.cafe.waiter.data.response.ProcessedJobResponse;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,8 +21,8 @@ public class Cashier {
         }
     }
 
-    public List<ProcessedJob> getProcessedJobs() throws IOException {
-        return new ObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<ProcessedJob>>() {
+    public List<ProcessedJobResponse> getProcessedJobs() throws IOException {
+        return new ObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<ProcessedJobResponse>>() {
         });
     }
 }

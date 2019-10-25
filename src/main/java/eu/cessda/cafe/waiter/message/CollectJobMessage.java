@@ -28,8 +28,6 @@ public class CollectJobMessage {
 	}
 	@Override
 	public String toString() {
-		return "message: {" + x  + "job(s) collected" + ", still waiting for " + y + " job(s)}";
+        return x + " job(s) collected" + ", still waiting for " + y + " job(s).";
 	}
-		
-
 }

@@ -3,13 +3,12 @@ package eu.cessda.cafe.waiter.engine;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
+import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
 import java.util.UUID;
 
 @Log4j2
@@ -29,7 +28,7 @@ public class CoffeeMachine {
         retrieveJob(jobId);
     }
 
-    public void retrieveJob(UUID id) {
+    public CoffeeMachineResponse retrieveJob(UUID id) {
         // START
         log.info("Retrieving Job {}", id);
 
@@ -40,24 +39,18 @@ public class CoffeeMachine {
             var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
 
             // Get the response
-            var responseMap = new ObjectMapper().readValue(retrieveJobUrl, Response.class);
-            log.trace(responseMap);
+            var responseMap = new ObjectMapper().readValue(retrieveJobUrl, CoffeeMachineResponse.class);
+            if (log.isTraceEnabled()) log.trace(responseMap);
+
+            return responseMap;
 
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Malformed URL. This is almost certainly a bug with the application.", e);
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);
         } catch (IOException e) {
-            log.error("Error connecting to {}", coffeeMachineUrl, e);
+            log.error("Error connecting to {}: {}", coffeeMachineUrl, e.getMessage());
         }
-    }
-
-    @Data
-    private static class Response {
-        UUID jobId;
-        String product;
-        Date jobStarted;
-        Date jobReady;
-        Date jobRetrieved;
+        return null;
     }
 }

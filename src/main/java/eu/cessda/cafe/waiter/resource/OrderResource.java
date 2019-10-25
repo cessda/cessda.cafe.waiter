@@ -1,19 +1,15 @@
 package eu.cessda.cafe.waiter.resource;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
-import eu.cessda.cafe.waiter.message.RetrieveOrderMessage;
 import eu.cessda.cafe.waiter.service.OrderService;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 
 
 /*
@@ -24,13 +20,13 @@ import eu.cessda.cafe.waiter.service.OrderService;
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/retrieve-order")
 public class OrderResource {
-	
-	OrderService orderService = new OrderService();
+
+	private static final String ORDER_UNKNOWN = "Order Unknown";
 	private final Map<String, Order> orderList = DatabaseClass.getOrder();
     Order order = new Order();
-	String condition1 = " Message:Order Unknown";
-	String condition2 = " Message:Order Not Ready";
-	String condition3 = " Message:Order Already Delivered";
+	private static final String ORDER_NOT_READY = "Order Not Ready";
+	private static final String ORDER_ALREADY_DELIVERED = "Order Already Delivered";
+	private OrderService orderService = new OrderService();
 
 	@GET
 	@Path("/{orderId}")
@@ -49,24 +45,24 @@ public class OrderResource {
 			
 			
 		// check conditions whether any open jobs are done and orders delivered	
-		
-			if (ans == false) {
-				RetrieveOrderMessage message1 = new RetrieveOrderMessage(condition1);
+
+		if (!ans) {
+			var message1 = new ApiMessage(ORDER_UNKNOWN);
 				return Response
 						.status(400)
 						.entity(message1)
 						.build();	
 			} else {
-				
-				if ( orderList.get(orderId).getCoffees().length != orderList.get(orderId).getOrdersize()) {
-					RetrieveOrderMessage message2 = new RetrieveOrderMessage(condition2);
+
+			if (orderList.get(orderId).getCoffees().length != orderList.get(orderId).getOrderSize()) {
+				var message2 = new ApiMessage(ORDER_NOT_READY);
 					return Response
 							.status(400)
 							.entity(message2)
 							.build();	
 				} else  {
-					if (orderList.get(orderId).getOrderDelivered() != "") {
-					RetrieveOrderMessage message3 = new RetrieveOrderMessage(condition3);	
+				if (!orderList.get(orderId).getOrderDelivered().equals("")) {
+					var message3 = new ApiMessage(ORDER_ALREADY_DELIVERED);
 					return Response
 							.status(400)
 							.entity(message3)

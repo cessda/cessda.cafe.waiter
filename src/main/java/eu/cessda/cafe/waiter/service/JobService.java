@@ -1,9 +1,10 @@
 package eu.cessda.cafe.waiter.service;
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
+import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.JobResponse;
 import eu.cessda.cafe.waiter.data.model.Machines;
-import eu.cessda.cafe.waiter.data.model.ProcessedJob;
+import eu.cessda.cafe.waiter.data.response.ProcessedJobResponse;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.engine.CoffeeMachine;
 import eu.cessda.cafe.waiter.message.CollectJobMessage;
@@ -54,7 +55,7 @@ public class JobService {
         }
     }
 
-    public ApiMessage collectJobsMessage() {
+    public ApiMessage collectJobs() {
 
         int x = 0;
         int y = 0;
@@ -62,11 +63,19 @@ public class JobService {
         CollectJobMessage collectResponse = new CollectJobMessage();
         try {
             var processedJobs = new Cashier(cashierUrl).getProcessedJobs();
-            log.trace(processedJobs);
-            for (ProcessedJob job : processedJobs) {
-                // Start processing the job if not processed
-                new CoffeeMachine(job.getMachine()).retrieveJob(job.getJobId());
-                boolean isHashcodeEquals = job.hashCode() == collectJobs.hashCode();
+            if (log.isTraceEnabled()) log.trace(processedJobs);
+            for (ProcessedJobResponse processedJob : processedJobs) {
+                // Start retrieving the job if not retrieved
+                var coffeeMachineResponse = new CoffeeMachine(processedJob.getMachine()).retrieveJob(processedJob.getJobId());
+
+                if (coffeeMachineResponse != null) {
+                    var job = new Job();
+                    job.setJobId(processedJob.getJobId());
+                    job.setJobStarted(processedJob.getJobStarted());
+                    job.setProduct(processedJob.getProduct());
+                }
+
+                boolean isHashcodeEquals = processedJob.hashCode() == collectJobs.hashCode();
                 if (isHashcodeEquals) {
                     x++;
                 } else {
@@ -77,8 +86,8 @@ public class JobService {
             collectResponse.setY(y);
             return new ApiMessage(collectResponse.toString());
         } catch (IOException e) {
-            log.error("Connection error:", e);
-            return new ApiMessage("Error connecting to " + cashierUrl);
+            log.error("Error connecting to {}: {}", cashierUrl, e.getMessage());
+            return new ApiMessage("Error connecting to Cashier " + cashierUrl);
         }
     }
 }
