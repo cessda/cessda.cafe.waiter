@@ -2,15 +2,12 @@ package eu.cessda.cafe.waiter.service;
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
-import eu.cessda.cafe.waiter.data.model.JobResponse;
 import eu.cessda.cafe.waiter.data.model.Machines;
 import eu.cessda.cafe.waiter.data.response.ProcessedJobResponse;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.engine.CoffeeMachine;
 import lombok.extern.log4j.Log4j2;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,8 +38,6 @@ public class JobService {
      * TO BE REVIEWED by Matthew   
 */
     Machines machine = new Machines();
-    private final JobResponse collectJobs = new JobResponse();
-    private final Client client = ClientBuilder.newClient();
     //private static final String cashierUrl = machine.getCashier();
     private final URL cashierUrl;
 
@@ -56,14 +51,17 @@ public class JobService {
 
     public ApiMessage collectJobs() {
 
-        int x = 0;
-        int y = 0;
+        int jobsCollected = 0;
+        int jobsNotCollected = 0;
+
+        log.info("Collecting jobs from Cashier {}", cashierUrl);
 
         try {
             var processedJobs = new Cashier(cashierUrl).getProcessedJobs();
             if (log.isTraceEnabled()) log.trace(processedJobs);
             for (ProcessedJobResponse processedJob : processedJobs) {
                 // Start retrieving the job if not retrieved
+                // TODO: Check if a coffee has already been retrieved
                 var coffeeMachineResponse = new CoffeeMachine(processedJob.getMachine()).retrieveJob(processedJob.getJobId());
 
                 if (coffeeMachineResponse != null) {
@@ -71,16 +69,14 @@ public class JobService {
                     job.setJobId(processedJob.getJobId());
                     job.setJobStarted(processedJob.getJobStarted());
                     job.setProduct(processedJob.getProduct());
-                }
 
-                boolean isHashcodeEquals = processedJob.hashCode() == collectJobs.hashCode();
-                if (isHashcodeEquals) {
-                    x++;
+                    // Set the job as collected
+                    jobsCollected++;
                 } else {
-                    y++;
+                    jobsNotCollected++;
                 }
             }
-            return ApiMessage.collectJobMessage(x, y);
+            return ApiMessage.collectJobMessage(jobsCollected, jobsNotCollected);
         } catch (IOException e) {
             log.error("Error connecting to {}: {}", cashierUrl, e.getMessage());
             return new ApiMessage("Error connecting to Cashier " + cashierUrl);
