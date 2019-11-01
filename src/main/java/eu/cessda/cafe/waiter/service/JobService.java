@@ -43,7 +43,7 @@ public class JobService {
 
     public JobService() {
         try {
-            cashierUrl = new URL("http://localhost:1336/");
+            cashierUrl = new URL("http://localhost:80/");
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
