@@ -5,14 +5,7 @@
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
         <GELF name="gelfAppender" protocol="udp" server="mgmt-graylog.cessda-mgmt.svc.cluster.local" port="12201" hostName="localhost">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>  
-            <Filters>
-                <MarkerFilter marker="FLOW" onMatch="DENY" onMismatch="NEUTRAL"/>
-                <MarkerFilter marker="EXCEPTION" onMatch="DENY" onMismatch="ACCEPT"/>
-            </Filters>
-            <KeyValuePair key="app" value="cafe-waiter" />
-            <KeyValuePair key="version" value="1.0.0-SNAPSHOT"/>
-            <KeyValuePair key="env" value="sandbox"/>            
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>             
         </GELF>
     </Appenders>
     <Loggers>
