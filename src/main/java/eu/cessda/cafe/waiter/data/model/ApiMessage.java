@@ -27,4 +27,8 @@ public class ApiMessage {
         String message = jobsCollected + " job(s) collected" + ", still waiting for " + jobsNotCollected + " job(s).";
         return new ApiMessage(message);
     }
+
+    public static ApiMessage Healthy() {
+        return new ApiMessage("Ok");
+    }
 }
