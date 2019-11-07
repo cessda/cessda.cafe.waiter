@@ -11,11 +11,11 @@ import java.util.UUID;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProcessedJobResponse {
-    private UUID jobId;
-    private Product product;
-    private UUID orderId;
-    private Date orderPlaced;
-    private int orderSize;
-    private URL machine;
-    private Date jobStarted;
+    UUID jobId;
+    Product product;
+    UUID orderId;
+    Date orderPlaced;
+    int orderSize;
+    URL machine;
+    Date jobStarted;
 }
