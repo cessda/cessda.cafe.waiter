@@ -26,6 +26,5 @@ public class JobResource {
 		// TODO: Cashier code
 
         return Response.ok(jobService.collectJobs()).build();
-		
 	}
 }
