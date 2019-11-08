@@ -1,3 +1,18 @@
+<!--
+  ~ Copyright CESSDA ERIC 2019.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  ~ use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied. See the License for the specific language
+  ~ governing permissions and limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -124,7 +139,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-        </dependency>    
+        </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
@@ -168,21 +183,21 @@
     </dependencies>
 
     <organization>
-    	<name>CESSDA ERIC</name>
-    	<url>https://www.cessda.eu/</url>
+        <name>CESSDA ERIC</name>
+        <url>https://www.cessda.eu/</url>
     </organization>
 
     <ciManagement>
-    	<url>https://jenkins-dev.cessda.eu/job/cessda.cafe.waiter/</url>
-    	<system>Jenkins</system>
+        <url>https://jenkins-dev.cessda.eu/job/cessda.cafe.waiter/</url>
+        <system>Jenkins</system>
     </ciManagement>
 
     <issueManagement>
-    	<system>Bitbucket</system>
-    	<url>https://bitbucket.org/cessda/cessda.cafe.waiter/issues</url>
+        <system>Bitbucket</system>
+        <url>https://bitbucket.org/cessda/cessda.cafe.waiter/issues</url>
     </issueManagement>
 
     <scm>
-    	<url>https://bitbucket.org/cessda/cessda.cafe.waiter.git/</url>
+        <url>https://bitbucket.org/cessda/cessda.cafe.waiter.git/</url>
     </scm>
 </project>

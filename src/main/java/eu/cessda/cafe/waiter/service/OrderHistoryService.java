@@ -1,41 +1,38 @@
+/*
+ * Copyright CESSDA ERIC 2019.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
 package eu.cessda.cafe.waiter.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import eu.cessda.cafe.waiter.data.model.Machines;
-import eu.cessda.cafe.waiter.data.model.OrderHistory;
-import eu.cessda.cafe.waiter.data.model.Product;
+import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
+import lombok.extern.log4j.Log4j2;
 
+import java.util.Collection;
+import java.util.UUID;
+
+@Log4j2
 public class OrderHistoryService {
-	Machines machine = new Machines();
-	String coffeeMachine = machine.getCoffeeMachine();
-	Product product1 = Product.CAPPUCCINO;
-	Product product2 = Product.COFFEE;
-	Product product3 = Product.KAKAO;
-	
-	private final Map<String, OrderHistory> orderHistory = DatabaseClass.getOrderHistory();
 
-	public OrderHistoryService() {
-		
-		orderHistory.put("00000000-FFFF-FFFF-FFFF-000000000000", new OrderHistory("00000000-FFFF-FFFF-FFFF-000000000000","00000000-2222-2222-2222-000000000000",new Product[] {product3,product3}, "2019-07-31T01:00:00.000Z","2019-07-31T01:00:01.000Z", 2, coffeeMachine,"2019-07-31T01:00:01.000Z","2019-07-31T01:00:32.000Z"));
-		orderHistory.put("00000000-AAAA-AAAA-AAAA-000000000000", new OrderHistory("00000000-AAAA-AAAA-AAAA-000000000000","00000000-2222-2222-2222-000000000000",new Product[] {product3,product2}, "2019-07-31T01:00:00.000Z","2019-07-31T01:00:01.000Z", 2, coffeeMachine,"2019-07-31T01:00:01.000Z","2019-07-31T01:00:32.000Z"));
-		orderHistory.put("00000000-BBBB-BBBB-BBBB-000000000000", new OrderHistory("00000000-BBBB-BBBB-BBBB-000000000000","00000000-2222-2222-2222-000000000000",new Product[] {product1}, "2019-07-31T01:00:00.000Z","2019-07-31T01:00:01.000Z", 1, coffeeMachine,"2019-07-31T01:00:01.000Z","2019-07-31T01:00:32.000Z"));
-	}
-	
-    public List<OrderHistory> getOrderHistory(){
-		
-		return new ArrayList<>(orderHistory.values());
-	}
-    
-    public OrderHistory getSpecificOrderHistory(String orderId) {
-    	
-    	return orderHistory.get(orderId);
+    public Collection<Job> getOrderHistory() {
+        return DatabaseClass.job.values();
     }
-    
-   }
+
+    public Job getOrderHistory(UUID orderId) {
+        return DatabaseClass.job.get(orderId);
+    }
+}
 	
 	
 

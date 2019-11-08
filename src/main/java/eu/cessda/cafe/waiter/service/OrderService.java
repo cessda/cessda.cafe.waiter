@@ -1,15 +1,28 @@
+/*
+ * Copyright CESSDA ERIC 2019.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
 package eu.cessda.cafe.waiter.service;
 
 import eu.cessda.cafe.waiter.data.model.Order;
-import eu.cessda.cafe.waiter.data.model.Product;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 import lombok.extern.log4j.Log4j2;
 
-import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 /*
  * Java Engine class to process logic on /retrieve-order/ end points
@@ -18,40 +31,22 @@ import java.util.Map;
 @Log4j2
 public class OrderService {
 
-    private final Map<String, Order> orderList = DatabaseClass.getOrder();
-    Order order = new Order();
-    private Product product1 = Product.CAPPUCCINO;
-    private Product product2 = Product.COFFEE;
-    private Product product3 = Product.KAKAO;
-
-
-    // OrderService class construct
-    public OrderService() {
-        orderList.put("00000000-FFFF-FFFF-FFFF-000000000000", new Order("00000000-FFFF-FFFF-FFFF-000000000000", "2019-07-31T01:00:00.000Z", 2, new Product[]{product1, product2}, "2019-07-31T01:00:01.000Z"));
-        orderList.put("00000000-AAAA-AAAA-AAAA-000000000000", new Order("00000000-AAAA-AAAA-AAAA-000000000000", "2019-07-31T01:00:00.000Z", 2, new Product[]{product2, product3}, ""));
-        orderList.put("00000000-BBBB-BBBB-BBBB-000000000000", new Order("00000000-BBBB-BBBB-BBBB-000000000000", "2019-07-31T01:00:00.000Z", 3, new Product[]{product1, product3}, ""));
-    }
-
-
     // Returns all orders from from cashier
     public List<Order> getOrder() {
-        return new ArrayList<>(orderList.values());
+        return new ArrayList<>(DatabaseClass.order.values());
     }
 
 
-    public Order getSpecificOrder(String orderId) {
-
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T01:'HH:mm:ss'Z'");
-        Date date = new Date(System.currentTimeMillis());
-        String now = formatter.format(date);
+    public Order getSpecificOrder(UUID orderId) {
 
         // update Order delivery date (time)
-        orderList.get(orderId).setOrderDelivered(now);
+        var order = DatabaseClass.order.get(orderId);
+        order.setOrderDelivered(new Date(System.currentTimeMillis()));
+        DatabaseClass.order.put(order.getOrderId(), order);
 
         log.debug("Order {} Delivery updated", orderId);
 
-        return orderList.get(orderId);
-
+        return order;
     }
 }
 	
