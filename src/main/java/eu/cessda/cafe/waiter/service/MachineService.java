@@ -23,7 +23,7 @@ import eu.cessda.cafe.waiter.data.model.Machines;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 
 import java.net.URL;
-import java.util.List;
+import java.util.Collection;
 
 public class MachineService {
 
@@ -33,8 +33,8 @@ public class MachineService {
     }
 
     // Returns configured coffee and cashier configurations
-    public List<Machines> getMachines() {
-        return (List<Machines>) DatabaseClass.machine.values();
+    public Collection<Machines> getMachines() {
+        return DatabaseClass.machine.values();
     }
 
     // Post configurations of coffee and cashier machines
