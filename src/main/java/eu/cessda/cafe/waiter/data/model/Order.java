@@ -25,7 +25,7 @@ import java.util.UUID;
 public class Order {
     UUID orderId;
     Date orderPlaced;
-    int ordersize;
+    int orderSize;
     List<Product> coffees;
     Date orderDelivered;
 }

@@ -42,7 +42,7 @@ public class OrderResource {
     Order order = new Order();
     private static final String ORDER_NOT_READY = "Order Not Ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order Already Delivered";
-    private OrderService orderService = new OrderService();
+    private final  OrderService orderService = new OrderService();
 
     @GET
     @Path("/{orderId}")
@@ -52,6 +52,8 @@ public class OrderResource {
             var invalidOrderIdMessage = new ApiMessage("OrderId cannot be blank");
             return Response.serverError().entity(invalidOrderIdMessage).build();
         }
+        
+        orderService.getOrderService(orderId);
 
 
         /* Returns responses for specific order based on conditions
@@ -71,7 +73,7 @@ public class OrderResource {
                     .build();
         } else {
 
-            if (orderList.get(orderId).getCoffees().size() != orderList.get(orderId).getOrdersize()) {
+            if (orderList.get(orderId).getCoffees().size() != orderList.get(orderId).getOrderSize()) {
                 var orderNotReadyMessage = new ApiMessage(ORDER_NOT_READY);
                 return Response
                         .status(400)
