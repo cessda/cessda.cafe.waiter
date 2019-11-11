@@ -19,6 +19,8 @@ package eu.cessda.cafe.waiter.resource;
  * Java Resource class to expose /collect-jobs end point.
  */
 
+import eu.cessda.cafe.waiter.data.model.ApiMessage;
+import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 
 import javax.ws.rs.Consumes;
@@ -35,11 +37,13 @@ public class JobResource {
 
     private final JobService jobService = new JobService();
 
-    //  Return message from a  post method on /collect-jobs
+    // Return message from a post method on /collect-jobs
     @POST
     public Response postCollectJobs() {
-        // TODO: Cashier code
-
-        return Response.ok(jobService.collectJobs()).build();
+        try {
+            return Response.ok(jobService.collectJobs()).build();
+        } catch (CashierConnectionException e) { // In the case that the cashier cannot be contacted
+            return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+        }
     }
 }
