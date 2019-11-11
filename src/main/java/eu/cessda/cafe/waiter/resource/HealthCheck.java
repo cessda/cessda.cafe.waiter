@@ -27,8 +27,10 @@ import javax.ws.rs.core.MediaType;
 @Path("/healthcheck")
 @Produces(MediaType.APPLICATION_JSON)
 public class HealthCheck {
+	
     @GET
     public ApiMessage getHealth() {
-        return ApiMessage.Healthy();
+    	log.info("Checking health status: {}", ApiMessage.Healthy());
+        return ApiMessage.Healthy();        
     }
 }
