@@ -13,17 +13,10 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.exceptions;
 
-/*
- * Java class to keep coffee machine and cashier end points configurations
- */
-
-import lombok.Data;
-
-import java.net.URL;
-
-@Data
-public class Machines {
-    private URL cashier;
+public class CashierConnectionException extends Exception {
+    public CashierConnectionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

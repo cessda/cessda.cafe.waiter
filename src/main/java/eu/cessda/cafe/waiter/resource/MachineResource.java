@@ -45,7 +45,7 @@ public class MachineResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response postMachine(Machines machine) {
-        machineService.postMachines(machine.getCashierUrl());
+        machineService.postMachines(machine.getCashier());
         return Response
                 .status(201)
                 .entity(machine)

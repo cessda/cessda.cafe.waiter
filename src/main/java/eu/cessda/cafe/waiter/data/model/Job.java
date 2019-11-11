@@ -17,6 +17,7 @@ package eu.cessda.cafe.waiter.data.model;
 
 import lombok.Data;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
 
@@ -31,7 +32,7 @@ public class Job {
     private Date orderPlaced;
     private Date orderDelivered;
     private int orderSize;
-    private Machines machine;
+    private URL machine;
     private Date jobStarted;
     private Date jobRetrieved;
 }

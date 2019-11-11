@@ -40,9 +40,9 @@ public class MachineService {
     // Post configurations of coffee and cashier machines
     public Machines postMachines(URL cashierUrl) {
         var machine = new Machines();
-        machine.setCashierUrl(cashierUrl);
+        machine.setCashier(cashierUrl);
 
-        DatabaseClass.machine.put(cashierUrl, machine);
+        DatabaseClass.machine.put("cashier", machine);
 
         return machine;
     }
