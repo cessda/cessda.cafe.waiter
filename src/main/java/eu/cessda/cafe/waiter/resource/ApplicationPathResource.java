@@ -21,7 +21,7 @@ package eu.cessda.cafe.waiter.resource;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-@ApplicationPath("")
+@ApplicationPath("/")
 public class ApplicationPathResource  extends Application {
 
 }
