@@ -62,10 +62,10 @@ public class OrderService {
 					// Add Order data
 					order.setOrderId(orderProcess.getOrderId());
 					order.setOrderPlaced(orderProcess.getOrderPlaced());
-					order.setOrderSize(orderProcess.getOrderSize());					
-				    List<Product> list = new ArrayList<Product>();
+					order.setOrderSize(orderProcess.getOrderSize());
+					List<Product> list = new ArrayList<>();
 				    list.add(orderProcess.getProduct());
-				    order.setCoffees(list);
+					//order.setCoffees(list);
 				    
 					// Update Order data persistently
 					DatabaseClass.order.put(orderProcess.getOrderId(), order);
