@@ -26,6 +26,6 @@ public class Order {
     UUID orderId;
     Date orderPlaced;
     int orderSize;
-    List<Job> coffees;
+    List<Job> jobs;
     Date orderDelivered;
 }

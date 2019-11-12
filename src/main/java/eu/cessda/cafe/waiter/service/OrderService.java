@@ -38,7 +38,7 @@ public class OrderService {
 
 	public OrderService() {
 		try {
-			cashierUrl = new URL("http://localhost:5000");
+			cashierUrl = new URL("http://cafe-cashier:1336/");
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
