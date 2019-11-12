@@ -15,6 +15,7 @@
 
 package eu.cessda.cafe.waiter.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.net.URL;
@@ -25,6 +26,7 @@ import java.util.UUID;
  * Java Class to store jobs collected from Cashier or Coffee Machine
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Job {
     private UUID jobId;
     private Product product;

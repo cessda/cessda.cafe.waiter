@@ -18,11 +18,14 @@ package eu.cessda.cafe.waiter.resource;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
+import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
+import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -54,13 +57,18 @@ public class OrderResource {
         }
         
         orderService.getOrderService(orderId);
-
+        try {
+            new JobService().collectJobs();
+        } catch (CashierConnectionException e) {
+            return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+        }
 
         /* Returns responses for specific order based on conditions
          *
          */
 
         boolean ans = orderList.containsKey(orderId);
+        var order = orderList.get(orderId);
 
 
         // check conditions whether any open jobs are done and orders delivered
@@ -72,28 +80,33 @@ public class OrderResource {
                     .entity(orderUnknownMessage)
                     .build();
         } else {
-
-            if (orderList.get(orderId).getJobs().size() != orderList.get(orderId).getOrderSize()) {
+            boolean success = false;
+            for (var job : order.getJobs()) {
+                if (job != null) {
+                    var retrivedJob = DatabaseClass.job.get(job.getJobId());
+                    if (retrivedJob != null) {
+                        success = true;
+                    }
+                }
+            }
+            if (!success) {
                 var orderNotReadyMessage = new ApiMessage(ORDER_NOT_READY);
                 return Response
                         .status(400)
                         .entity(orderNotReadyMessage)
                         .build();
-            } else {
-                if (orderList.get(orderId).getOrderDelivered() != null) {
-                    var orderAlreadyDeliveredMessage = new ApiMessage(ORDER_ALREADY_DELIVERED);
-                    return Response
-                            .status(400)
-                            .entity(orderAlreadyDeliveredMessage)
-                            .build();
-                } else {
-                    return Response.ok()
-                            .entity(orderService.getSpecificOrder(orderId))
-                            .build();
-                }
             }
-
-
+            if (order.getOrderDelivered() != null) {
+                var orderAlreadyDeliveredMessage = new ApiMessage(ORDER_ALREADY_DELIVERED);
+                return Response
+                        .status(400)
+                        .entity(orderAlreadyDeliveredMessage)
+                        .build();
+            } else {
+                order.setOrderDelivered(new Date());
+                DatabaseClass.order.put(order.getOrderId(), order);
+                return Response.ok().entity(order).build();
+            }
         }
     }
 

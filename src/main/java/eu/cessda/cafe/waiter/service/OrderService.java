@@ -15,11 +15,9 @@
 
 package eu.cessda.cafe.waiter.service;
 
-import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
-import eu.cessda.cafe.waiter.data.response.OrderHistoryResponse;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
-import eu.cessda.cafe.waiter.engine.CashierOrder;
+import eu.cessda.cafe.waiter.engine.Cashier;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -27,49 +25,41 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-/*
+/**
  * Java Engine class to process logic on /retrieve-order/ end points
  */
-
 @Log4j2
 public class OrderService {
-	
-    Order order = new Order();
-    URL cashierUrl;
-	
-    public  void getOrderService(UUID orderId) {
-    	log.info("Connecting to  Cashier {}");
-		try {
-             cashierUrl = new URL("http://104.199.96.25:1336/");
-             
-         } catch (MalformedURLException e) {
-             throw new IllegalStateException(e);
-         }
-		
-		  log.info("Collecting Orders from Cashier {}", cashierUrl);
-		try {
-			var processedOrder = new CashierOrder(cashierUrl).getOrderHistory();
-			 if (log.isTraceEnabled()) log.trace(processedOrder);
-			
-			for (OrderHistoryResponse orderProcess : processedOrder) {			
 
-			//	var orderCheck = orderProcess.getOrderId();
+	private URL cashierUrl;
+
+	public OrderService() {
+		try {
+			cashierUrl = new URL("http://localhost:5000");
+		} catch (MalformedURLException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public void getOrderService(UUID orderId) {
+
+		log.info("Collecting orders from Cashier {}", cashierUrl);
+
+		try {
+			var orderHistory = new Cashier(cashierUrl).getOrderHistory();
+			if (log.isTraceEnabled()) log.trace(orderHistory);
+
+			for (Order order : orderHistory) {
+
+				var orderCheck = order.getOrderId();
 				// Set coffee products that correspond to orderId
-			//	while(orderCheck != null) {
-					// Add Order data
-					order.setOrderId(orderProcess.getOrderId());
-					order.setOrderPlaced(orderProcess.getOrderPlaced());
-					order.setOrderSize(orderProcess.getOrderSize());
-					order.setCoffees(orderProcess.getJobs());
-				
+				if (orderCheck != null) {
 					// Update Order data persistently
-					DatabaseClass.order.put(orderProcess.getOrderId(), order);
-					
-			//	} 
+					DatabaseClass.order.put(order.getOrderId(), order);
+				}
 				log.debug("Order database {}  updated", orderId);
 			} 
 						

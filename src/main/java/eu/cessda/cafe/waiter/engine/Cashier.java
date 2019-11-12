@@ -17,19 +17,23 @@ package eu.cessda.cafe.waiter.engine;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.data.response.ProcessedJobResponse;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.UUID;
 
 public class Cashier {
 
+    private final URL orderHistoryEndpoint;
     private final URL processedJobsEndpoint;
 
     public Cashier(URL cashierUrl) {
         try {
+            orderHistoryEndpoint = new URL(cashierUrl, "order-history");
             processedJobsEndpoint = new URL(cashierUrl, "processed-jobs");
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
@@ -45,5 +49,26 @@ public class Cashier {
     public List<ProcessedJobResponse> getProcessedJobs() throws IOException {
         return new ObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<ProcessedJobResponse>>() {
         });
+    }
+
+    /**
+     * Retrieve the order history from the cashier
+     *
+     * @return List of orders
+     * @throws IOException if a problem occurs getting the orders
+     */
+    public List<Order> getOrderHistory() throws IOException {
+        return new ObjectMapper().readValue(orderHistoryEndpoint, new TypeReference<List<Order>>() {
+        });
+    }
+
+    public List<Order> getOrderHistory(UUID orderId) throws IOException {
+        try {
+            var orderIdEndpoint = new URL(orderHistoryEndpoint, orderId.toString());
+            return new ObjectMapper().readValue(orderIdEndpoint, new TypeReference<Order>() {
+            });
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
