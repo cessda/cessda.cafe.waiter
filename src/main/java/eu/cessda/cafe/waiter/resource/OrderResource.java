@@ -26,7 +26,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,22 +41,19 @@ public class OrderResource {
 
     private static final String ORDER_UNKNOWN = "Order Unknown";
     private static final Map<UUID, Order> orderList = DatabaseClass.order;
-    Order order = new Order();
     private static final String ORDER_NOT_READY = "Order Not Ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order Already Delivered";
-    private final  OrderService orderService = new OrderService();
 
     @GET
     @Path("/{orderId}")
     public Response getSpecificOrder(@PathParam("orderId") UUID orderId) {
 
         if (orderId == null) {
-            var invalidOrderIdMessage = new ApiMessage("OrderId cannot be blank");
-            return Response.serverError().entity(invalidOrderIdMessage).build();
+            return Response.status(400).entity(new ApiMessage("OrderId cannot be blank")).build();
         }
-        
-        orderService.getOrderService(orderId);
+
         try {
+            new OrderService().getOrders();
             new JobService().collectJobs();
         } catch (CashierConnectionException e) {
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
@@ -67,52 +63,48 @@ public class OrderResource {
          *
          */
 
-        boolean ans = orderList.containsKey(orderId);
         var order = orderList.get(orderId);
-
 
         // check conditions whether any open jobs are done and orders delivered
 
-        if (!ans) {
-            var orderUnknownMessage = new ApiMessage(ORDER_UNKNOWN);
-            return Response
-                    .status(400)
-                    .entity(orderUnknownMessage)
-                    .build();
+        if (order == null) {
+            // The order doesn't exist
+            return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         } else {
-            boolean success = false;
-            for (var job : order.getJobs()) {
-                if (job != null) {
-                    var retrivedJob = DatabaseClass.job.get(job.getJobId());
-                    if (retrivedJob != null) {
-                        success = true;
-                    }
+            // The order exists, find what state it's in
+            return getOrderState(order);
+        }
+    }
+
+    private Response getOrderState(Order order) {
+        boolean success = true;
+
+        // Does the order have all it's jobs retrieved
+        for (var job : order.getJobs()) {
+            if (job != null) {
+                var retrivedJob = DatabaseClass.job.get(job.getJobId());
+                if (retrivedJob == null) {
+                    success = false;
                 }
             }
-            if (!success) {
-                var orderNotReadyMessage = new ApiMessage(ORDER_NOT_READY);
-                return Response
-                        .status(400)
-                        .entity(orderNotReadyMessage)
-                        .build();
-            }
-            if (order.getOrderDelivered() != null) {
-                var orderAlreadyDeliveredMessage = new ApiMessage(ORDER_ALREADY_DELIVERED);
-                return Response
-                        .status(400)
-                        .entity(orderAlreadyDeliveredMessage)
-                        .build();
-            } else {
-                order.setOrderDelivered(new Date());
-                DatabaseClass.order.put(order.getOrderId(), order);
-                return Response.ok().entity(order).build();
-            }
+        }
+        if (!success) {
+            // Not all jobs are retrieved
+            return Response.status(400).entity(new ApiMessage(ORDER_NOT_READY)).build();
+        }
+        if (order.getOrderDelivered() != null) {
+            // The order has already been delivered
+            return Response.status(400).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
+        } else {
+            // Deliver the order
+            order.setOrderDelivered(new Date());
+            DatabaseClass.order.replace(order.getOrderId(), order);
+            return Response.ok().entity(order).build();
         }
     }
 
     @GET
-    public List<Order> getAllOrder() {
-
-        return orderService.getOrder();
+    public Response getAllOrder() {
+        return Response.ok(DatabaseClass.order.values()).build();
     }
 }

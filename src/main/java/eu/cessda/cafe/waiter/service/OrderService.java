@@ -18,14 +18,13 @@ package eu.cessda.cafe.waiter.service;
 import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.engine.Cashier;
+import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,7 +43,7 @@ public class OrderService {
 		}
 	}
 
-	public void getOrderService(UUID orderId) {
+    public void getOrders() throws CashierConnectionException {
 
 		log.info("Collecting orders from Cashier {}", cashierUrl);
 
@@ -53,27 +52,15 @@ public class OrderService {
 			if (log.isTraceEnabled()) log.trace(orderHistory);
 
 			for (Order order : orderHistory) {
+                // Update Order data persistently
+                DatabaseClass.order.putIfAbsent(order.getOrderId(), order);
+            }
 
-				var orderCheck = order.getOrderId();
-				// Set coffee products that correspond to orderId
-				if (orderCheck != null) {
-					// Update Order data persistently
-					DatabaseClass.order.put(order.getOrderId(), order);
-				}
-				log.debug("Order database {}  updated", orderId);
-			} 
-						
-		} catch (IOException e) {
-			e.printStackTrace();
+        } catch (IOException e) { // Send the exception up so a 500 can be generated
+            log.error("Error connecting to cashier {}: {}", cashierUrl, e);
+            throw new CashierConnectionException("Error connecting to cashier " + cashierUrl, e);
 		}
-		
-
 	}
-
-	// Returns all orders from from cashier
-    public List<Order> getOrder() {
-        return new ArrayList<>(DatabaseClass.order.values());
-    }
 
 
     public Order getSpecificOrder(UUID orderId) {
