@@ -19,8 +19,10 @@ import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
+import eu.cessda.cafe.waiter.resource.ApplicationPathResource;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,7 +38,7 @@ public class OrderService {
 
 	public OrderService() {
 		try {
-            cashierUrl = new URL(DatabaseClass.CASHIER_URL);
+            cashierUrl = new URL(ApplicationPathResource.CASHIER_URL);
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
@@ -61,12 +63,15 @@ public class OrderService {
         }
     }
 
-    public void getOrders(UUID orderId) throws CashierConnectionException {
+    public void getOrders(UUID orderId) throws CashierConnectionException, FileNotFoundException {
         log.info("Collecting order {} from Cashier {}.", orderId, cashierUrl);
         try {
             // Collect only the specified order
             var order = new Cashier(cashierUrl).getOrderHistory(orderId);
             DatabaseClass.order.putIfAbsent(order.getOrderId(), order);
+        } catch (FileNotFoundException e) {
+            log.warn("The order {} was not found on the cashier.", orderId);
+            throw e;
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}", cashierUrl, e);
             throw CashierConnectionException.exceptionMessage(cashierUrl, e);

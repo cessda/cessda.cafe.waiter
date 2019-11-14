@@ -30,7 +30,6 @@ import java.util.UUID;
 
 @UtilityClass
 public class DatabaseClass {
-    public static final String CASHIER_URL = "http://cafe-cashier:1336/";
     public static final Map<String, Machines> machine = new HashMap<>();
     public static final Map<UUID, Order> order = new HashMap<>();
     public static final Map<UUID, Job> job = new HashMap<>();

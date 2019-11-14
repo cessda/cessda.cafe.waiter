@@ -65,7 +65,7 @@ public class Cashier {
      * @throws IOException if a problem occurs getting the orders
      */
     public List<Order> getOrderHistory() throws IOException {
-        log.info("Retriving all orders from {}.", orderHistoryEndpoint);
+        log.info("Retrieving all orders from {}.", orderHistoryEndpoint);
         return new ObjectMapper().readValue(orderHistoryEndpoint, new TypeReference<List<Order>>() {
         });
     }
@@ -80,7 +80,7 @@ public class Cashier {
     public Order getOrderHistory(UUID orderId) throws IOException {
         log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
         try {
-            var orderIdEndpoint = new URL(orderHistoryEndpoint, orderId.toString());
+            var orderIdEndpoint = new URL(orderHistoryEndpoint.toString() + "/" + orderId.toString());
             return new ObjectMapper().readValue(orderIdEndpoint, new TypeReference<Order>() {
             });
         } catch (MalformedURLException e) {

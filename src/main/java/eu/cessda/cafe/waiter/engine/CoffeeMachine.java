@@ -56,7 +56,6 @@ public class CoffeeMachine {
 
         try {
             // Set the connection url
-            log.info("Connecting to coffee machine {}", coffeeMachineUrl);
             var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
 
             // Get the response

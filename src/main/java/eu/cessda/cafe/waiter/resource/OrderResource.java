@@ -26,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -58,18 +59,24 @@ public class OrderResource {
             return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
         }
 
+        // Is the order already delivered
+        var order = DatabaseClass.order.get(orderId);
+        if (order != null && order.getOrderDelivered() != null) {
+            // The order has already been delivered
+            log.info("Order {} already retrieved.", order.getOrderId());
+            return Response.status(400).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
+        }
+
         try {
             new OrderService().getOrders(orderId);
             new JobService().collectJobs();
         } catch (CashierConnectionException e) {
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+        } catch (FileNotFoundException e) {
+            return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
 
-        /* Returns responses for specific order based on conditions
-         *
-         */
-
-        var order = DatabaseClass.order.get(orderId);
+        order = DatabaseClass.order.get(orderId);
 
         // check conditions whether any open jobs are done and orders delivered
 
@@ -97,11 +104,6 @@ public class OrderResource {
         if (!success) {
             // Not all jobs are retrieved
             return Response.status(400).entity(new ApiMessage(ORDER_NOT_READY)).build();
-        }
-        if (order.getOrderDelivered() != null) {
-            // The order has already been delivered
-            log.info("Order {} already retrieved.", order.getOrderId());
-            return Response.status(400).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
         } else {
             // Deliver the order
             order.setOrderDelivered(new Date());

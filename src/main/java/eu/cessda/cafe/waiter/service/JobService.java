@@ -21,6 +21,7 @@ import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.engine.CoffeeMachine;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
+import eu.cessda.cafe.waiter.resource.ApplicationPathResource;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class JobService {
 
     public JobService() {
         try {
-            cashierUrl = new URL(DatabaseClass.CASHIER_URL);
+            cashierUrl = new URL(ApplicationPathResource.CASHIER_URL);
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
@@ -84,7 +85,7 @@ public class JobService {
             }
             return ApiMessage.collectJobMessage(jobsCollected, jobsNotCollected);
         } catch (IOException e) { // Send the exception up so a 500 can be generated
-            log.error("Error connecting to cashier {}: {}", cashierUrl, e);
+            log.error("Error connecting to cashier {}: {}.", cashierUrl, e);
             throw CashierConnectionException.exceptionMessage(cashierUrl, e);
         }
     }
