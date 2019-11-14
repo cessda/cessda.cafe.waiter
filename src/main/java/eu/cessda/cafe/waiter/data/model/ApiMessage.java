@@ -24,7 +24,6 @@ import lombok.NonNull;
 @Data
 public class ApiMessage {
 
-    // Prevent messages from being modified after creation
     /**
      * The message to store
      */
@@ -43,7 +42,7 @@ public class ApiMessage {
         return new ApiMessage(message);
     }
 
-    public static ApiMessage Healthy() {
+    public static ApiMessage healthy() {
         return new ApiMessage("Ok");
     }
 }

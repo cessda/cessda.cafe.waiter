@@ -52,10 +52,8 @@ public class CoffeeMachine {
      * @return The response from the remote coffee machine, or null if an error occurred
      */
     public CoffeeMachineResponse retrieveJob(UUID id) {
-        // START
-        log.info("Retrieving Job {}", id);
+        log.info("Retrieving job {} from {}.", id, coffeeMachineUrl);
 
-        // Get all coffee machines (or better, get the associated coffee machine)
         try {
             // Set the connection url
             log.info("Connecting to coffee machine {}", coffeeMachineUrl);
@@ -72,7 +70,7 @@ public class CoffeeMachine {
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);
         } catch (IOException e) {
-            log.error("Error connecting to {}: {}", coffeeMachineUrl, e.getMessage());
+            log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
         }
         return null;
     }

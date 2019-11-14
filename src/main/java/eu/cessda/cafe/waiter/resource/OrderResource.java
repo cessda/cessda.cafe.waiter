@@ -21,12 +21,12 @@ import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
+import lombok.extern.log4j.Log4j2;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 
@@ -37,23 +37,29 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/retrieve-order")
+@Log4j2
 public class OrderResource {
 
     private static final String ORDER_UNKNOWN = "Order Unknown";
-    private static final Map<UUID, Order> orderList = DatabaseClass.order;
-    private static final String ORDER_NOT_READY = "Order Not Ready";
-    private static final String ORDER_ALREADY_DELIVERED = "Order Already Delivered";
+    private static final String ORDER_NOT_READY = "Order not ready";
+    private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
 
+    /**
+     * Retrieves the specified order
+     *
+     * @param orderId The order to retrieve
+     * @return The retrieved order, or a message if an error occurred
+     */
     @GET
     @Path("/{orderId}")
-    public Response getSpecificOrder(@PathParam("orderId") UUID orderId) {
+    public Response getOrder(@PathParam("orderId") UUID orderId) {
 
         if (orderId == null) {
-            return Response.status(400).entity(new ApiMessage("OrderId cannot be blank")).build();
+            return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
         }
 
         try {
-            new OrderService().getOrders();
+            new OrderService().getOrders(orderId);
             new JobService().collectJobs();
         } catch (CashierConnectionException e) {
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
@@ -63,7 +69,7 @@ public class OrderResource {
          *
          */
 
-        var order = orderList.get(orderId);
+        var order = DatabaseClass.order.get(orderId);
 
         // check conditions whether any open jobs are done and orders delivered
 
@@ -77,15 +83,15 @@ public class OrderResource {
     }
 
     private Response getOrderState(Order order) {
-        boolean success = true;
-
         // Does the order have all it's jobs retrieved
+        boolean success = true;
         for (var job : order.getJobs()) {
-            if (job != null) {
-                var retrivedJob = DatabaseClass.job.get(job.getJobId());
-                if (retrivedJob == null) {
-                    success = false;
-                }
+            var retrievedJob = DatabaseClass.job.get(job.getJobId());
+            if (retrievedJob == null) {
+                log.warn("Couldn't retrieve job {} of order {}.", job.getJobId(), order.getOrderId());
+                success = false;
+            } else {
+                log.info("Retrieved job {} of order {}.", retrievedJob.getJobId(), order.getOrderId());
             }
         }
         if (!success) {
@@ -94,17 +100,14 @@ public class OrderResource {
         }
         if (order.getOrderDelivered() != null) {
             // The order has already been delivered
+            log.info("Order {} already retrieved.", order.getOrderId());
             return Response.status(400).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
         } else {
             // Deliver the order
             order.setOrderDelivered(new Date());
             DatabaseClass.order.replace(order.getOrderId(), order);
+            log.info("Order {} retrieved.", order.getOrderId());
             return Response.ok().entity(order).build();
         }
-    }
-
-    @GET
-    public Response getAllOrder() {
-        return Response.ok(DatabaseClass.order.values()).build();
     }
 }

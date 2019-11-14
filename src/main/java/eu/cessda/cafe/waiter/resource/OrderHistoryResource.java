@@ -16,7 +16,7 @@
 package eu.cessda.cafe.waiter.resource;
 
 
-import eu.cessda.cafe.waiter.data.model.ApiMessage;
+import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 
 import javax.ws.rs.GET;
@@ -25,6 +25,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -34,20 +35,35 @@ import java.util.UUID;
 @Path("/order-history")
 public class OrderHistoryResource {
 
+    /**
+     * Gets the order history of the waiter
+     *
+     * @return A list of all known jobs
+     */
     @GET
     public Response getOrderHistory() {
         return Response.ok(DatabaseClass.job.values()).build();
     }
 
+    /**
+     * Gets the order history of a specified order
+     *
+     * @param orderId The order to get
+     * @return A list of all jobs in the order
+     */
     @GET
     @Path("/{orderId}")
     public Response getOrderHistory(@PathParam("orderId") UUID orderId) {
-        var order = DatabaseClass.job.get(orderId);
-        if (order == null) {
-            var errorMessage = new ApiMessage("Order Unknown");
-            return Response.status(400).entity(errorMessage).build();
-        } else {
-            return Response.ok(order).build();
+        var orders = DatabaseClass.job.values();
+        var jobList = new ArrayList<Job>();
+        for (var job : orders) {
+            if (job.getOrderId() == orderId) {
+                jobList.add(job);
+            }
         }
+        if (jobList.isEmpty()) {
+            return Response.status(400).build();
+        }
+        return Response.ok(jobList).build();
     }
 }

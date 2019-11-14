@@ -24,7 +24,6 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -33,11 +32,11 @@ import java.util.UUID;
 @Log4j2
 public class OrderService {
 
-	private URL cashierUrl;
+    private final URL cashierUrl;
 
 	public OrderService() {
 		try {
-			cashierUrl = new URL("http://cafe-cashier:1336/");
+            cashierUrl = new URL(DatabaseClass.CASHIER_URL);
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
@@ -45,34 +44,33 @@ public class OrderService {
 
     public void getOrders() throws CashierConnectionException {
 
-		log.info("Collecting orders from Cashier {}", cashierUrl);
+        log.info("Collecting orders from Cashier {}.", cashierUrl);
 
-		try {
-			var orderHistory = new Cashier(cashierUrl).getOrderHistory();
-			if (log.isTraceEnabled()) log.trace(orderHistory);
+        try {
+            var orderHistory = new Cashier(cashierUrl).getOrderHistory();
+            if (log.isTraceEnabled()) log.trace(orderHistory);
 
-			for (Order order : orderHistory) {
+            for (Order order : orderHistory) {
                 // Update Order data persistently
                 DatabaseClass.order.putIfAbsent(order.getOrderId(), order);
             }
 
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}", cashierUrl, e);
-            throw new CashierConnectionException("Error connecting to cashier " + cashierUrl, e);
-		}
-	}
+            throw CashierConnectionException.exceptionMessage(cashierUrl, e);
+        }
+    }
 
-
-    public Order getSpecificOrder(UUID orderId) {
-
-        // update Order delivery date (time)
-        var order = DatabaseClass.order.get(orderId);
-        order.setOrderDelivered(new Date(System.currentTimeMillis()));
-        DatabaseClass.order.put(order.getOrderId(), order);
-
-        log.debug("Order {} Delivery updated", orderId);
-
-        return order;
+    public void getOrders(UUID orderId) throws CashierConnectionException {
+        log.info("Collecting order {} from Cashier {}.", orderId, cashierUrl);
+        try {
+            // Collect only the specified order
+            var order = new Cashier(cashierUrl).getOrderHistory(orderId);
+            DatabaseClass.order.putIfAbsent(order.getOrderId(), order);
+        } catch (IOException e) { // Send the exception up so a 500 can be generated
+            log.error("Error connecting to cashier {}: {}", cashierUrl, e);
+            throw CashierConnectionException.exceptionMessage(cashierUrl, e);
+        }
     }
 }
 	

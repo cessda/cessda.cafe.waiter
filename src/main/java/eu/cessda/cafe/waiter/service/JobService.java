@@ -17,7 +17,6 @@ package eu.cessda.cafe.waiter.service;
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
-import eu.cessda.cafe.waiter.data.response.ProcessedJobResponse;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.engine.CoffeeMachine;
@@ -39,7 +38,7 @@ public class JobService {
 
     public JobService() {
         try {
-            cashierUrl = new URL("http://104.199.96.25:1336/");
+            cashierUrl = new URL(DatabaseClass.CASHIER_URL);
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
@@ -47,7 +46,7 @@ public class JobService {
 
     public ApiMessage collectJobs() throws CashierConnectionException {
 
-        log.info("Collecting jobs from cashier {}", cashierUrl);
+        log.info("Collecting jobs from cashier {}.", cashierUrl);
 
         try {
             var processedJobs = new Cashier(cashierUrl).getProcessedJobs();
@@ -56,21 +55,16 @@ public class JobService {
             var jobsCollected = 0;
             var jobsNotCollected = 0;
 
-            for (ProcessedJobResponse processedJob : processedJobs) {
+            for (Job job : processedJobs) {
                 // Start retrieving the job if not retrieved
-                var databaseJob = DatabaseClass.job.get(processedJob.getJobId());
-                if (databaseJob == null) {
-                    var coffeeMachineResponse = new CoffeeMachine(processedJob.getMachine()).retrieveJob(processedJob.getJobId());
+                if (!DatabaseClass.job.containsKey(job.getJobId())) {
+
+                    var coffeeMachineResponse = new CoffeeMachine(job.getMachine()).retrieveJob(job.getJobId());
 
                     if (coffeeMachineResponse != null) {
-                        // Construct a new Job object and copy known variables
-                        var job = new Job();
+                        // Copy known variables from the coffee machine
                         job.setJobId(coffeeMachineResponse.getJobId());
                         job.setJobStarted(coffeeMachineResponse.getJobStarted());
-                        job.setMachine(processedJob.getMachine());
-                        job.setOrderId(processedJob.getOrderId());
-                        job.setOrderPlaced(processedJob.getOrderPlaced());
-                        job.setOrderSize(processedJob.getOrderSize());
                         job.setProduct(coffeeMachineResponse.getProduct());
 
                         // Set job as retrieved at the current time
@@ -80,8 +74,10 @@ public class JobService {
                         DatabaseClass.job.put(job.getJobId(), job);
 
                         // Set the job as collected
+                        log.info("Collected job {}.", job.getJobId());
                         jobsCollected++;
                     } else {
+                        log.warn("Couldn't collect job {} from {}.", job.getJobId(), job.getMachine());
                         jobsNotCollected++;
                     }
                 }
@@ -89,7 +85,7 @@ public class JobService {
             return ApiMessage.collectJobMessage(jobsCollected, jobsNotCollected);
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}", cashierUrl, e);
-            throw new CashierConnectionException("Error connecting to cashier " + cashierUrl, e);
+            throw CashierConnectionException.exceptionMessage(cashierUrl, e);
         }
     }
 }
