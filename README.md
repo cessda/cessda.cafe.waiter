@@ -7,8 +7,6 @@
 
 This project is an implementation of the CESSDA Café Waiter program using Java API for RESTful Web Services [JAX-RS 2.0](https://download.oracle.com/otndocs/jcp/jaxrs-2_0-fr-eval-spec/index.html) Specifications deploying [Jersey](https://eclipse-ee4j.github.io/jersey/) as the Inteface implementation.   
 
-## Getting Started
-
 
 
 ## Prerequisites
@@ -16,8 +14,32 @@ This project is an implementation of the CESSDA Café Waiter program using Java 
 The following tools need to be installed locally to build and test the application:
 
 * Java JDK 11
-* 
+* Maven 
 
+## Getting Started
+
+To compie and install the application on your local environment 
+
+
+```
+      mvn clean install 
+```
+
+
+To run testing  
+
+```
+      mvn test
+```
+
+
+## Options
+
+To set url environment variable for waiter component
+
+```
+      export WAITER_URL="http://localhost:1338"
+```
 
 ## Technology Stack
 
