@@ -1,0 +1,8 @@
+Dockerfile
+.idea
+.settings
+.gitignore
+README.md
+waiter.eml
+waiter.iml
+target

@@ -35,6 +35,7 @@
 
     <build>
         <plugins>
+            <!--Java Compiler-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -70,17 +71,11 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--Embedded Tomcat for debugging-->
+            <!--Embedded Jetty for debugging-->
             <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.7.7</version>
-                <configuration>
-                    <container>
-                        <containerId>tomcat9x</containerId>
-                        <type>embedded</type>
-                    </container>
-                </configuration>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.4.23.v20191118</version>
             </plugin>
             <!--Docker Containerisation-->
             <plugin>
