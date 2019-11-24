@@ -57,7 +57,7 @@ public class OrderResource {
     @Path("/{orderId}")
     public Response getOrder(
     		@PathParam("orderId") UUID orderId,
-    		@HeaderParam("X-Request-ID") String requestId) {
+    		@HeaderParam("X-Request-Id") String requestId) {
     	
     	requestListener.requestInitialized(requestId);
         if (orderId == null) {
