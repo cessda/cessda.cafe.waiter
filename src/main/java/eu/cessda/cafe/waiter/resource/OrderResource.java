@@ -19,6 +19,7 @@ import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
+import eu.cessda.cafe.waiter.message.RequestListener;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
 import lombok.extern.log4j.Log4j2;
@@ -44,6 +45,7 @@ public class OrderResource {
     private static final String ORDER_UNKNOWN = "Order Unknown";
     private static final String ORDER_NOT_READY = "Order not ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
+    RequestListener requestListener = new RequestListener();
 
     /**
      * Retrieves the specified order
@@ -53,8 +55,11 @@ public class OrderResource {
      */
     @GET
     @Path("/{orderId}")
-    public Response getOrder(@PathParam("orderId") UUID orderId) {
-
+    public Response getOrder(
+    		@PathParam("orderId") UUID orderId,
+    		@HeaderParam("X-Request-ID") String requestId) {
+    	
+    	requestListener.requestInitialized(requestId);
         if (orderId == null) {
             return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
         }
@@ -86,8 +91,11 @@ public class OrderResource {
         } else {
             // The order exists, find what state it's in
             return getOrderState(order);
+            
         }
+        
     }
+    
 
     private Response getOrderState(Order order) {
         // Does the order have all it's jobs retrieved
@@ -109,7 +117,9 @@ public class OrderResource {
             order.setOrderDelivered(new Date());
             DatabaseClass.order.replace(order.getOrderId(), order);
             log.info("Order {} retrieved.", order.getOrderId());
+            requestListener.requestDestroyed();
             return Response.ok().entity(order).build();
+            
         }
     }
 }
