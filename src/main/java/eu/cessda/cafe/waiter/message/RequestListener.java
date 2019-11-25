@@ -13,6 +13,7 @@ public class RequestListener {
 		log.debug("-----Request ID Initialized-----");
 		if (requestId != null) {
 		ThreadContext.put("X-Request-Id",requestId);;
+		log.info("This is Request-ID from client {}", requestId);
 		}else {
 			ThreadContext.push("X-Request-Id", UUID.randomUUID());;
 		}

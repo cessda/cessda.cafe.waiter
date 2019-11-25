@@ -25,8 +25,11 @@ import eu.cessda.cafe.waiter.service.OrderService;
 import lombok.extern.log4j.Log4j2;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.UUID;
@@ -57,9 +60,19 @@ public class OrderResource {
     @Path("/{orderId}")
     public Response getOrder(
     		@PathParam("orderId") UUID orderId,
-    		@HeaderParam("X-Request-Id") String requestId) {
+    		@Context HttpHeaders requestHeaders) {
+    	
+    	
+    	java.util.Set<String> headerKeys = requestHeaders.getRequestHeaders().keySet();
+        for(String header:headerKeys){
+        	log.debug("This is List of HTTP request headers {}", requestHeaders.getRequestHeader(header).get(0));
+        }
+   
+    	
+    	String requestId = requestHeaders.getRequestHeader("X-Request-Id").get(0);
     	
     	requestListener.requestInitialized(requestId);
+    	
         if (orderId == null) {
             return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
         }
