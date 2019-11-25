@@ -12,9 +12,9 @@ public class RequestListener {
 	public void requestInitialized (String requestId) {
 		log.debug("-----Request ID Initialized-----");
 		if (requestId != null) {
-		ThreadContext.put("X-Request-ID",requestId);;
+		ThreadContext.put("X-Request-Id",requestId);;
 		}else {
-			ThreadContext.push("X-Request-ID", UUID.randomUUID());;
+			ThreadContext.push("X-Request-Id", UUID.randomUUID());;
 		}
 	}
 	
