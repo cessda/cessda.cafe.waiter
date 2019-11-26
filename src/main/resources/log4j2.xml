@@ -19,8 +19,9 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %X{X-Request-Id} %-5level %logger{36} - %msg%n"/>
         </Console>
-        <GELF name="gelfAppender" protocol="udp" server="mgmt-graylog.cessda-mgmt.svc.cluster.local" port="12201" hostName="localhost">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %X{X-Request-Id} %-5level %logger{36} - %msg%n"/>             
+        <GELF name="gelfAppender" protocol="udp" server="mgmt-graylog.cessda-mgmt.svc.cluster.local" port="12201"
+              hostName="${hostName}">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %X{X-Request-Id} %-5level %logger{36} - %msg%n"/>
         </GELF>
     </Appenders>
     <Loggers>
