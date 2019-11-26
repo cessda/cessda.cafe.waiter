@@ -16,9 +16,9 @@
 package eu.cessda.cafe.waiter.engine;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
+import eu.cessda.cafe.waiter.helpers.JsonUtils;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
@@ -54,7 +54,7 @@ public class Cashier {
      */
     public List<Job> getProcessedJobs() throws IOException {
         log.info("Retrieving all processed jobs from {}.", processedJobsEndpoint);
-        return new ObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<Job>>() {
+        return JsonUtils.getObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<Job>>() {
         });
     }
 
@@ -66,7 +66,7 @@ public class Cashier {
      */
     public List<Order> getOrderHistory() throws IOException {
         log.info("Retrieving all orders from {}.", orderHistoryEndpoint);
-        return new ObjectMapper().readValue(orderHistoryEndpoint, new TypeReference<List<Order>>() {
+        return JsonUtils.getObjectMapper().readValue(orderHistoryEndpoint, new TypeReference<List<Order>>() {
         });
     }
 
@@ -81,7 +81,7 @@ public class Cashier {
         log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
         try {
             var orderIdEndpoint = new URL(orderHistoryEndpoint.toString() + "/" + orderId.toString());
-            return new ObjectMapper().readValue(orderIdEndpoint, new TypeReference<Order>() {
+            return JsonUtils.getObjectMapper().readValue(orderIdEndpoint, new TypeReference<Order>() {
             });
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);

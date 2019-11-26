@@ -17,8 +17,8 @@ package eu.cessda.cafe.waiter.engine;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
+import eu.cessda.cafe.waiter.helpers.JsonUtils;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
@@ -59,7 +59,7 @@ public class CoffeeMachine {
             var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
 
             // Get the response
-            var responseMap = new ObjectMapper().readValue(retrieveJobUrl, CoffeeMachineResponse.class);
+            var responseMap = JsonUtils.getObjectMapper().readValue(retrieveJobUrl, CoffeeMachineResponse.class);
             if (log.isTraceEnabled()) log.trace(responseMap);
 
             return responseMap;

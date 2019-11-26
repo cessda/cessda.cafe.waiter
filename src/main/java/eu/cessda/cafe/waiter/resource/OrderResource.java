@@ -29,9 +29,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.io.FileNotFoundException;
-import java.util.Date;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 
@@ -48,7 +48,7 @@ public class OrderResource {
     private static final String ORDER_UNKNOWN = "Order Unknown";
     private static final String ORDER_NOT_READY = "Order not ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
-    RequestListener requestListener = new RequestListener();
+    private RequestListener requestListener = new RequestListener();
 
     /**
      * Retrieves the specified order
@@ -127,7 +127,7 @@ public class OrderResource {
             return Response.status(400).entity(new ApiMessage(ORDER_NOT_READY)).build();
         } else {
             // Deliver the order
-            order.setOrderDelivered(new Date());
+            order.setOrderDelivered(OffsetDateTime.now(ZoneId.of("UTC")));
             DatabaseClass.order.replace(order.getOrderId(), order);
             log.info("Order {} retrieved.", order.getOrderId());
             requestListener.requestDestroyed();

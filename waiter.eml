@@ -32,6 +32,9 @@
 		<level name="Maven: jakarta.ws.rs:jakarta.ws.rs-api:2.1.6" value="project"/>
 		<level name="Maven: org.glassfish.jersey.core:jersey-client:2.29.1" value="project"/>
 		<level name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.8.7" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.7" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.7" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.core:jackson-databind:2.8.7" value="project"/>
 		<level name="Maven: org.glassfish.jersey.inject:jersey-hk2:2.29.1" value="project"/>
 		<level name="Maven: org.glassfish.hk2:hk2-locator:2.6.1" value="project"/>
 		<level name="Maven: org.glassfish.hk2.external:aopalliance-repackaged:2.6.1" value="project"/>
@@ -61,12 +64,10 @@
 		<level name="Maven: io.netty:netty-transport:4.1.6.Final" value="project"/>
 		<level name="Maven: io.netty:netty-resolver:4.1.6.Final" value="project"/>
 		<level name="Maven: io.netty:netty-codec:4.1.6.Final" value="project"/>
-		<level name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.4" value="project"/>
 		<level name="Maven: io.swagger:swagger-jersey2-jaxrs:1.5.0" value="project"/>
 		<level name="Maven: io.swagger:swagger-jaxrs:1.5.0" value="project"/>
 		<level name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.4.2" value="project"/>
 		<level name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.4.2" value="project"/>
-		<level name="Maven: com.fasterxml.jackson.core:jackson-databind:2.4.2" value="project"/>
 		<level name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.4.2" value="project"/>
 		<level name="Maven: org.codehaus.woodstox:stax2-api:3.1.4" value="project"/>
 		<level name="Maven: io.swagger:swagger-core:1.5.0" value="project"/>

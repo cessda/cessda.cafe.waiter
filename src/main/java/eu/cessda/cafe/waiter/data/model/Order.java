@@ -17,15 +17,15 @@ package eu.cessda.cafe.waiter.data.model;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Data
 public class Order {
     UUID orderId;
-    Date orderPlaced;
+    OffsetDateTime orderPlaced;
     int orderSize;
     List<Job> jobs;
-    Date orderDelivered;
+    OffsetDateTime orderDelivered;
 }

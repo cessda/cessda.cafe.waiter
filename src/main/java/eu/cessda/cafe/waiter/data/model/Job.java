@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.net.URL;
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
@@ -31,10 +31,10 @@ public class Job {
     private UUID jobId;
     private Product product;
     private UUID orderId;
-    private Date orderPlaced;
-    private Date orderDelivered;
+    private OffsetDateTime orderPlaced;
+    private OffsetDateTime orderDelivered;
     private int orderSize;
     private URL machine;
-    private Date jobStarted;
-    private Date jobRetrieved;
+    private OffsetDateTime jobStarted;
+    private OffsetDateTime jobRetrieved;
 }

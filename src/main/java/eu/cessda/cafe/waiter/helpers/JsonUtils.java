@@ -13,16 +13,19 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.resource;
+package eu.cessda.cafe.waiter.helpers;
 
-/*
- * Setup the Application path for the program.
- */
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.experimental.UtilityClass;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
-@ApplicationPath("/")
-public class ApplicationPathResource extends Application {
-    public static final String CASHIER_URL = "http://localhost:1336/";
+@UtilityClass
+public class JsonUtils {
+    public static ObjectMapper getObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
+    }
 }
