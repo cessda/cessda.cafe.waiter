@@ -76,7 +76,7 @@ pipeline {
         }
         stage('Deploy Docker Image') {
             steps {
-                build job: '../cessda.cafe.deployment/master', parameters: [string(name: 'waiter_image_tag', value: "${image_tag}"), string(name: 'module', value: 'waiter')], wait: false
+                build job: '../cessda.cafe.deployment/master', parameters: [string(name: 'waiter_image_tag', value: "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"), string(name: 'component', value: 'waiter')], wait: false
             }
             when { branch 'master' }
         }
