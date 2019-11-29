@@ -37,7 +37,7 @@ public class CoffeeMachine {
     private final URL coffeeMachineUrl;
 
     /**
-     * Constructor, sets up the remote coffee machine
+     * Sets up the remote coffee machine
      *
      * @param coffeeMachineUrl The URL of the coffee machine.
      */

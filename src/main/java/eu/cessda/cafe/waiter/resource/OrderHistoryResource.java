@@ -42,7 +42,7 @@ public class OrderHistoryResource {
      */
     @GET
     public Response getOrderHistory() {
-        return Response.ok(DatabaseClass.job.values()).build();
+        return Response.ok(DatabaseClass.getJob().values()).build();
     }
 
     /**
@@ -54,7 +54,7 @@ public class OrderHistoryResource {
     @GET
     @Path("/{orderId}")
     public Response getOrderHistory(@PathParam("orderId") UUID orderId) {
-        var orders = DatabaseClass.job.values();
+        var orders = DatabaseClass.getJob().values();
         var jobList = new ArrayList<Job>();
         for (var job : orders) {
             if (job.getOrderId() == orderId) {

@@ -58,7 +58,7 @@ public class JobService {
 
             for (Job job : processedJobs) {
                 // Start retrieving the job if not retrieved
-                if (!DatabaseClass.job.containsKey(job.getJobId())) {
+                if (!DatabaseClass.getJob().containsKey(job.getJobId())) {
 
                     var coffeeMachineResponse = new CoffeeMachine(job.getMachine()).retrieveJob(job.getJobId());
 
@@ -72,7 +72,7 @@ public class JobService {
                         job.setJobRetrieved(coffeeMachineResponse.getJobRetrieved());
 
                         // Add the job to the persistent data store
-                        DatabaseClass.job.put(job.getJobId(), job);
+                        DatabaseClass.getJob().put(job.getJobId(), job);
 
                         // Set the job as collected
                         log.info("Collected job {}.", job.getJobId());

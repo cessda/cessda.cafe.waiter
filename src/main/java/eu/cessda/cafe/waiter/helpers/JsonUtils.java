@@ -22,6 +22,11 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class JsonUtils {
+    /**
+     * Gets an ObjectMapper with the JavaTimeModule enabled
+     *
+     * @return The ObjectMapper
+     */
     public static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());

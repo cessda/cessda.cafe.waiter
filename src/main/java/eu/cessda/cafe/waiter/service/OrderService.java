@@ -36,14 +36,22 @@ public class OrderService {
 
     private final URL cashierUrl;
 
-	public OrderService() {
-		try {
+    /**
+     * Sets the cashier URL used for all further methods in this class
+     */
+    public OrderService() {
+        try {
             cashierUrl = new URL(ApplicationPathResource.CASHIER_URL);
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
+    /**
+     * Gets the order history for all orders from the cashier
+     *
+     * @throws CashierConnectionException if a connection error occured connecting to the cashier
+     */
     public void getOrders() throws CashierConnectionException {
 
         log.info("Collecting orders from Cashier {}.", cashierUrl);
@@ -54,7 +62,7 @@ public class OrderService {
 
             for (Order order : orderHistory) {
                 // Update Order data persistently
-                DatabaseClass.order.putIfAbsent(order.getOrderId(), order);
+                DatabaseClass.getOrder().putIfAbsent(order.getOrderId(), order);
             }
 
         } catch (IOException e) { // Send the exception up so a 500 can be generated
@@ -63,12 +71,19 @@ public class OrderService {
         }
     }
 
+    /**
+     * Gets the order history for an order with a specific orderId from the cashier
+     *
+     * @param orderId The orderId to get
+     * @throws CashierConnectionException if a connection error occured connecting to the cashier
+     * @throws FileNotFoundException      if the order was not found on the cashier
+     */
     public void getOrders(UUID orderId) throws CashierConnectionException, FileNotFoundException {
         log.info("Collecting order {} from Cashier {}.", orderId, cashierUrl);
         try {
             // Collect only the specified order
             var order = new Cashier(cashierUrl).getOrderHistory(orderId);
-            DatabaseClass.order.putIfAbsent(order.getOrderId(), order);
+            DatabaseClass.getOrder().putIfAbsent(order.getOrderId(), order);
         } catch (FileNotFoundException e) {
             log.warn("The order {} was not found on the cashier.", orderId);
             throw e;

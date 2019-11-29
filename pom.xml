@@ -175,6 +175,7 @@
             <artifactId>swagger-jersey2-jaxrs</artifactId>
             <version>1.5.0</version>
         </dependency>
+        <!--Lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

@@ -78,7 +78,7 @@ public class OrderResource {
         }
 
         // Is the order already delivered
-        var order = DatabaseClass.order.get(orderId);
+        var order = DatabaseClass.getOrder().get(orderId);
         if (order != null && order.getOrderDelivered() != null) {
             // The order has already been delivered
             log.info("Order {} already retrieved.", order.getOrderId());
@@ -94,7 +94,7 @@ public class OrderResource {
             return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
 
-        order = DatabaseClass.order.get(orderId);
+        order = DatabaseClass.getOrder().get(orderId);
 
         // check conditions whether any open jobs are done and orders delivered
 
@@ -114,7 +114,7 @@ public class OrderResource {
         // Does the order have all it's jobs retrieved
         boolean success = true;
         for (var job : order.getJobs()) {
-            var retrievedJob = DatabaseClass.job.get(job.getJobId());
+            var retrievedJob = DatabaseClass.getJob().get(job.getJobId());
             if (retrievedJob == null) {
                 log.warn("Couldn't retrieve job {} of order {}.", job.getJobId(), order.getOrderId());
                 success = false;
@@ -128,7 +128,7 @@ public class OrderResource {
         } else {
             // Deliver the order
             order.setOrderDelivered(OffsetDateTime.now(ZoneId.of("UTC")));
-            DatabaseClass.order.replace(order.getOrderId(), order);
+            DatabaseClass.getOrder().replace(order.getOrderId(), order);
             log.info("Order {} retrieved.", order.getOrderId());
             requestListener.requestDestroyed();
             return Response.ok().entity(order).build();

@@ -27,14 +27,9 @@ import java.util.Collection;
 
 public class MachineService {
 
-    // MachineService class construct method
-    public MachineService() {
-//	 machines.put("machine", new Machines(null, "http://localhost:1337", "http://localhost:2222" ));	
-    }
-
     // Returns configured coffee and cashier configurations
     public Collection<Machines> getMachines() {
-        return DatabaseClass.machine.values();
+        return DatabaseClass.getMachine().values();
     }
 
     // Post configurations of coffee and cashier machines
@@ -42,14 +37,14 @@ public class MachineService {
         var machine = new Machines();
         machine.setCashier(cashierUrl);
 
-        DatabaseClass.machine.put("cashier", machine);
+        DatabaseClass.getMachine().put("cashier", machine);
 
         return machine;
     }
 
     // Remove configured coffee and cashier configurations
     public Machines deleteMachines(URL machine) {
-        return DatabaseClass.machine.remove(machine);
+        return DatabaseClass.getMachine().remove(machine.toString());
     }
 
 }
