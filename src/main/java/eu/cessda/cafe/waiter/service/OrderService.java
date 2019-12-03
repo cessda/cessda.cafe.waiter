@@ -50,7 +50,7 @@ public class OrderService {
     /**
      * Gets the order history for all orders from the cashier
      *
-     * @throws CashierConnectionException if a connection error occured connecting to the cashier
+     * @throws CashierConnectionException if a connection error occurred connecting to the cashier
      */
     public void getOrders() throws CashierConnectionException {
 

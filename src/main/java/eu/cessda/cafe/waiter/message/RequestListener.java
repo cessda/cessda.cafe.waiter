@@ -10,17 +10,17 @@ import lombok.extern.log4j.Log4j2;
 public class RequestListener {
 	
 	public void requestInitialized (String requestId) {
-		log.debug("-----Request ID Initialized-----");
+	//	log.debug("-----Request ID Initialized-----");
 		if (requestId != null) {
 		ThreadContext.put("X-Request-Id",requestId);;
-		log.info("This is Request-ID from client {}", requestId);
+	//	log.info("This is Request-ID from client {}", requestId);
 		}else {
 			ThreadContext.push("X-Request-Id", UUID.randomUUID());;
 		}
 	}
 	
 	public void requestDestroyed() {
-	    log.debug("-----Request ID Destroyed-----");
+	//    log.debug("-----Request ID Destroyed-----");
 	    ThreadContext.clearAll();
 	 }
 }
