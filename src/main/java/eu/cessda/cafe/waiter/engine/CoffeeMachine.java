@@ -17,6 +17,7 @@ package eu.cessda.cafe.waiter.engine;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
 import eu.cessda.cafe.waiter.helpers.JsonUtils;
 import lombok.NonNull;
@@ -25,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -46,31 +48,63 @@ public class CoffeeMachine {
     }
 
     /**
-     * Attempt to retrieve the specified job from the remote coffee machine
+     * Attempt to retrieve the specified job from the remote coffee machine.
      *
-     * @param id The UUID of the coffee to retrieve
-     * @return The response from the remote coffee machine, or null if an error occurred
+     * @param id The UUID of the coffee to retrieve.
+     * @return The response from the remote coffee machine, or null if an error occurred.
      */
     public CoffeeMachineResponse retrieveJob(UUID id) {
         log.info("Retrieving job {} from {}.", id, coffeeMachineUrl);
 
+        CoffeeMachineResponse responseMap = null;
+        String response = "";
         try {
             // Set the connection url
             var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
 
+            // Read the response to a string
+            response = new String(retrieveJobUrl.openStream().readAllBytes(), StandardCharsets.UTF_8);
+
             // Get the response
-            var responseMap = JsonUtils.getObjectMapper().readValue(retrieveJobUrl, CoffeeMachineResponse.class);
+            responseMap = JsonUtils.getObjectMapper().readValue(response, CoffeeMachineResponse.class);
             if (log.isTraceEnabled()) log.trace(responseMap);
-
-            return responseMap;
-
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Malformed URL. This is almost certainly a bug with the application.", e);
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);
         } catch (IOException e) {
-            log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
+            // Parse the message from the coffee machine to determine what should be logged
+            if (!parseCoffeeMachineResponse(response, id)) {
+                log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
+            }
         }
-        return null;
+        return responseMap;
+    }
+
+    /**
+     * Attempt to parse the response from the coffee machine.
+     * This method is for logging purposes only and has no effect on waiter function.
+     *
+     * @param response The response from the coffee machine.
+     * @param id       The jobId.
+     * @return if the message was parsed successfully.
+     */
+    private boolean parseCoffeeMachineResponse(String response, UUID id) {
+        try {
+            var message = JsonUtils.getObjectMapper().readValue(response, ApiMessage.class);
+            if (message.getMessage().equalsIgnoreCase("job unknown")) {
+                log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
+            } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
+                log.info("Job {} is not ready.", id);
+            } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
+                log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
+            } else { // Default handling
+                log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.getMessage());
+            }
+            return true;
+        } catch (IOException e) {
+            log.error("Response of the coffee machine couldn't be parsed.", e);
+        }
+        return false;
     }
 }
