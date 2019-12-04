@@ -35,10 +35,9 @@ import java.time.ZoneId;
 import java.util.UUID;
 
 
-/*
+/**
  * Java Resource class to expose /retrieve/orderId end point.
  */
-
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/retrieve-order")
@@ -61,20 +60,13 @@ public class OrderResource {
     public Response getOrder(
     		@PathParam("orderId") UUID orderId,
     		@Context HttpHeaders requestHeaders) {
-    	
-    	/*
-    	java.util.Set<String> headerKeys = requestHeaders.getRequestHeaders().keySet();
-        for(String header:headerKeys){
-        	log.debug("This is List of HTTP request headers {}", requestHeaders.getRequestHeader(header).get(0));
-        }
-          */
-    	
+
     	String requestId = requestHeaders.getRequestHeader("X-Request-Id").get(0);
     	
     	requestListener.requestInitialized(requestId);
     	
         if (orderId == null) {
-        	log.warn("Order {} order Invalid.");
+            log.warn("OrderId Invalid.");
             return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
         }
 
@@ -93,8 +85,8 @@ public class OrderResource {
         } catch (CashierConnectionException e) {
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
         } catch (FileNotFoundException e) {
-        	log.warn("Order {} order unknown.");
-            return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
+            log.warn("Order {} order unknown.", orderId);
+            return Response.status(404).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
 
         order = DatabaseClass.getOrder().get(orderId);
@@ -103,14 +95,12 @@ public class OrderResource {
 
         if (order == null) {
             // The order doesn't exist
-        	log.warn("Order {} order unknown.");
-            return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
+            log.warn("Order {} unknown.", orderId);
+            return Response.status(404).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         } else {
             // The order exists, find what state it's in
             return getOrderState(order);
-            
         }
-        
     }
     
 
@@ -128,16 +118,14 @@ public class OrderResource {
         }
         if (!success) {
             // Not all jobs are retrieved
-        	log.info("Order {} order not ready.");
+            log.info("Order {} not ready.", order.getOrderId());
             return Response.status(400).entity(new ApiMessage(ORDER_NOT_READY)).build();
         } else {
             // Deliver the order
             order.setOrderDelivered(OffsetDateTime.now(ZoneId.of("UTC")));
             DatabaseClass.getOrder().replace(order.getOrderId(), order);
             log.info("Order {} retrieved.", order.getOrderId());
-      //      requestListener.requestDestroyed();
             return Response.ok().entity(order).build();
-            
         }
     }
 }

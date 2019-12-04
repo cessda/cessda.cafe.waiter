@@ -24,6 +24,7 @@ import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -58,12 +59,19 @@ public class CoffeeMachine {
 
         CoffeeMachineResponse responseMap = null;
         String response = "";
+
         try {
             // Set the connection url
             var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
 
             // Read the response to a string
-            response = new String(retrieveJobUrl.openStream().readAllBytes(), StandardCharsets.UTF_8);
+            var httpConn = (HttpURLConnection) retrieveJobUrl.openConnection();
+            if (httpConn.getResponseCode() < 400) {
+                response = new String(httpConn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            } else {
+                response = new String(httpConn.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+                throw new IOException("Server returned code " + httpConn.getResponseCode());
+            }
 
             // Get the response
             responseMap = JsonUtils.getObjectMapper().readValue(response, CoffeeMachineResponse.class);
