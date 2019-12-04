@@ -66,7 +66,7 @@ public class CoffeeMachine {
 
             // Read the response to a string
             var httpConn = (HttpURLConnection) retrieveJobUrl.openConnection();
-            if (httpConn.getResponseCode() >= 400) {
+            if (httpConn.getResponseCode() <= 400) {
                 response = new String(httpConn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             } else {
                 response = new String(httpConn.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
