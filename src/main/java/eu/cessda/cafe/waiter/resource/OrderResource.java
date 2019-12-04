@@ -62,18 +62,19 @@ public class OrderResource {
     		@PathParam("orderId") UUID orderId,
     		@Context HttpHeaders requestHeaders) {
     	
-    	
+    	/*
     	java.util.Set<String> headerKeys = requestHeaders.getRequestHeaders().keySet();
         for(String header:headerKeys){
         	log.debug("This is List of HTTP request headers {}", requestHeaders.getRequestHeader(header).get(0));
         }
-   
+          */
     	
     	String requestId = requestHeaders.getRequestHeader("X-Request-Id").get(0);
     	
     	requestListener.requestInitialized(requestId);
     	
         if (orderId == null) {
+        	log.warn("Order {} order Invalid.");
             return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
         }
 
@@ -82,6 +83,7 @@ public class OrderResource {
         if (order != null && order.getOrderDelivered() != null) {
             // The order has already been delivered
             log.info("Order {} already retrieved.", order.getOrderId());
+            
             return Response.status(400).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
         }
 
@@ -91,6 +93,7 @@ public class OrderResource {
         } catch (CashierConnectionException e) {
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
         } catch (FileNotFoundException e) {
+        	log.warn("Order {} order unknown.");
             return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
 
@@ -100,6 +103,7 @@ public class OrderResource {
 
         if (order == null) {
             // The order doesn't exist
+        	log.warn("Order {} order unknown.");
             return Response.status(400).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         } else {
             // The order exists, find what state it's in
@@ -124,13 +128,14 @@ public class OrderResource {
         }
         if (!success) {
             // Not all jobs are retrieved
+        	log.info("Order {} order not ready.");
             return Response.status(400).entity(new ApiMessage(ORDER_NOT_READY)).build();
         } else {
             // Deliver the order
             order.setOrderDelivered(OffsetDateTime.now(ZoneId.of("UTC")));
             DatabaseClass.getOrder().replace(order.getOrderId(), order);
             log.info("Order {} retrieved.", order.getOrderId());
-            requestListener.requestDestroyed();
+      //      requestListener.requestDestroyed();
             return Response.ok().entity(order).build();
             
         }
