@@ -27,11 +27,11 @@ public class CashierConnectionException extends Exception {
     }
 
     /**
-     * Create a CashierConnectionException with a predefined message
+     * Create a CashierConnectionException with a predefined message.
      *
-     * @param cashierUrl The cashier url
-     * @param e          The inner IOException
-     * @return The generated exception
+     * @param cashierUrl The cashier url.
+     * @param e          The inner IOException.
+     * @return The generated exception.
      */
     public static CashierConnectionException exceptionMessage(URL cashierUrl, IOException e) {
         return new CashierConnectionException("Error connecting to cashier " + cashierUrl, e);

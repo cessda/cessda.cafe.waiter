@@ -34,14 +34,11 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
-
-    private final JobService jobService = new JobService();
-
     // Return message from a post method on /collect-jobs
     @POST
     public Response postCollectJobs() {
         try {
-            return Response.ok(jobService.collectJobs()).build();
+            return Response.ok(new JobService().collectJobs()).build();
         } catch (CashierConnectionException e) { // In the case that the cashier cannot be contacted
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
         }

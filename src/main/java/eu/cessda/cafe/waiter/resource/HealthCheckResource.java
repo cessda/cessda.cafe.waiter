@@ -13,17 +13,20 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.data.model;
+package eu.cessda.cafe.waiter.resource;
 
-/*
- * Java class to keep coffee machine and cashier end points configurations
- */
+import eu.cessda.cafe.waiter.data.model.ApiMessage;
 
-import lombok.Data;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-import java.net.URL;
-
-@Data
-public class Machines {
-    private URL cashier;
+@Path("/healthcheck")
+@Produces(MediaType.APPLICATION_JSON)
+public class HealthCheckResource {
+    @GET
+    public ApiMessage getHealth() {
+        return ApiMessage.healthy();
+    }
 }

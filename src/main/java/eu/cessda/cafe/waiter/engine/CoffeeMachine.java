@@ -95,7 +95,7 @@ public class CoffeeMachine {
      *
      * @param response The response from the coffee machine.
      * @param id       The jobId.
-     * @return if the message was parsed successfully.
+     * @return true if the message was parsed successfully, false otherwise.
      */
     private boolean parseCoffeeMachineResponse(String response, UUID id) {
         try {
@@ -103,7 +103,7 @@ public class CoffeeMachine {
             if (message.getMessage().equalsIgnoreCase("job unknown")) {
                 log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
             } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
-                log.info("Job {} is not ready.", id);
+                log.info("Job {} is not ready on coffee machine {}.", id, coffeeMachineUrl);
             } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
                 log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
             } else { // Default handling
@@ -111,7 +111,7 @@ public class CoffeeMachine {
             }
             return true;
         } catch (IOException e) {
-            log.error("Response of the coffee machine couldn't be parsed.", e);
+            log.error("Response from {} couldn't be parsed.", coffeeMachineUrl, e);
         }
         return false;
     }

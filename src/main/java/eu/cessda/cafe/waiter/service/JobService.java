@@ -78,7 +78,6 @@ public class JobService {
                         log.info("Collected job {}.", job.getJobId());
                         jobsCollected++;
                     } else {
-                        log.warn("Couldn't collect job {} from {}.", job.getJobId(), job.getMachine());
                         jobsNotCollected++;
                     }
                 }

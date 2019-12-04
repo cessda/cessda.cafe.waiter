@@ -36,15 +36,15 @@ import java.util.UUID;
 
 
 /**
- * Java Resource class to expose /retrieve/orderId end point.
+ * Java Resource class to expose /retrieve-order/orderId end point.
  */
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/retrieve-order")
 @Log4j2
-public class OrderResource {
+public class RetrieveOrderResource {
 
-    private static final String ORDER_UNKNOWN = "Order Unknown";
+    private static final String ORDER_UNKNOWN = "Order unknown";
     private static final String ORDER_NOT_READY = "Order not ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
     private RequestListener requestListener = new RequestListener();
@@ -67,7 +67,7 @@ public class OrderResource {
     	
         if (orderId == null) {
             log.warn("OrderId Invalid.");
-            return Response.status(400).entity(new ApiMessage("Invalid orderId")).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
         }
 
         // Is the order already delivered
@@ -75,35 +75,39 @@ public class OrderResource {
         if (order != null && order.getOrderDelivered() != null) {
             // The order has already been delivered
             log.info("Order {} already retrieved.", order.getOrderId());
-            
-            return Response.status(400).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
+            return Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
         }
 
+        // Update the orders from the cashier
         try {
             new OrderService().getOrders(orderId);
             new JobService().collectJobs();
+
+            order = DatabaseClass.getOrder().get(orderId);
+
+            // check conditions whether any open jobs are done and orders delivered
+            if (order == null) {
+                // The order doesn't exist
+                throw new FileNotFoundException(orderId.toString());
+            } else {
+                // The order exists, find what state it's in
+                return getOrderState(order);
+            }
         } catch (CashierConnectionException e) {
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
         } catch (FileNotFoundException e) {
-            log.warn("Order {} order unknown.", orderId);
-            return Response.status(404).entity(new ApiMessage(ORDER_UNKNOWN)).build();
-        }
-
-        order = DatabaseClass.getOrder().get(orderId);
-
-        // check conditions whether any open jobs are done and orders delivered
-
-        if (order == null) {
-            // The order doesn't exist
             log.warn("Order {} unknown.", orderId);
-            return Response.status(404).entity(new ApiMessage(ORDER_UNKNOWN)).build();
-        } else {
-            // The order exists, find what state it's in
-            return getOrderState(order);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
     }
-    
 
+    /**
+     * Gets the state of the order.
+     *
+     * @param order The order to check.
+     * @return a response containing the order if all jobs are delivered,
+     * otherwise a message stating the order is not ready.
+     */
     private Response getOrderState(Order order) {
         // Does the order have all it's jobs retrieved
         boolean success = true;
@@ -119,7 +123,7 @@ public class OrderResource {
         if (!success) {
             // Not all jobs are retrieved
             log.info("Order {} not ready.", order.getOrderId());
-            return Response.status(400).entity(new ApiMessage(ORDER_NOT_READY)).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage(ORDER_NOT_READY)).build();
         } else {
             // Deliver the order
             order.setOrderDelivered(OffsetDateTime.now(ZoneId.of("UTC")));

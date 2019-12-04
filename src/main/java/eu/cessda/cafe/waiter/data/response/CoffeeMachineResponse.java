@@ -16,12 +16,12 @@
 package eu.cessda.cafe.waiter.data.response;
 
 import eu.cessda.cafe.waiter.data.model.Product;
-import lombok.Data;
+import lombok.Value;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Data
+@Value
 public class CoffeeMachineResponse {
     UUID jobId;
     Product product;

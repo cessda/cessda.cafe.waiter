@@ -21,12 +21,13 @@
     <groupId>eu.cessda.cafe</groupId>
     <artifactId>waiter</artifactId>
     <packaging>war</packaging>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>CESSDA Café: Waiter</name>
     <description>Waiter implementation of the CESSDA Coffee API</description>
     <url>https://bitbucket.org/cessda/cessda.cafe/src/master/index.md</url>
 
     <properties>
+        <jackson.version>2.8.7</jackson.version>
         <jersey.version>2.29.1</jersey.version>
         <log4j.version>2.12.1</log4j.version>
         <junit.version>4.12</junit.version>
@@ -130,12 +131,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.8.7</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.8.7</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>

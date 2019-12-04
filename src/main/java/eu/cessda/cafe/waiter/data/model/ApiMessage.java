@@ -15,20 +15,20 @@
 
 package eu.cessda.cafe.waiter.data.model;
 
-import lombok.Data;
 import lombok.NonNull;
+import lombok.Value;
 
 /**
  * Class to hold messages sent to other Coffee API components
  */
-@Data
+@Value
 public class ApiMessage {
 
     /**
      * The message to store
      */
     @NonNull
-    private final String message;
+    String message;
 
     /**
      * Collected jobs message

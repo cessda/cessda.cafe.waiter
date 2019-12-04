@@ -62,7 +62,7 @@ public class OrderHistoryResource {
             }
         }
         if (jobList.isEmpty()) {
-            return Response.status(400).build();
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
         return Response.ok(jobList).build();
     }
