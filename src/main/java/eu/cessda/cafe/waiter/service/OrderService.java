@@ -62,7 +62,7 @@ public class OrderService {
 
             for (Order order : orderHistory) {
                 // Update Order data persistently
-                DatabaseClass.getOrder().putIfAbsent(order.getOrderId(), order);
+                DatabaseClass.getOrder().put(order.getOrderId(), order);
             }
 
         } catch (IOException e) { // Send the exception up so a 500 can be generated
@@ -83,7 +83,7 @@ public class OrderService {
         try {
             // Collect only the specified order
             var order = new Cashier(cashierUrl).getOrderHistory(orderId);
-            DatabaseClass.getOrder().putIfAbsent(order.getOrderId(), order);
+            DatabaseClass.getOrder().put(order.getOrderId(), order);
         } catch (FileNotFoundException e) {
             log.warn("The order {} was not found on the cashier.", orderId);
             throw e;
