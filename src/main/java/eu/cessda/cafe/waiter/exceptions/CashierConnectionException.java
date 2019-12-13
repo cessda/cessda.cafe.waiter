@@ -16,7 +16,7 @@
 package eu.cessda.cafe.waiter.exceptions;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Represents connection errors to the cashier
@@ -33,7 +33,7 @@ public class CashierConnectionException extends Exception {
      * @param e          The inner IOException.
      * @return The generated exception.
      */
-    public static CashierConnectionException exceptionMessage(URL cashierUrl, IOException e) {
+    public static CashierConnectionException exceptionMessage(URI cashierUrl, IOException e) {
         return new CashierConnectionException("Error connecting to cashier " + cashierUrl, e);
     }
 }

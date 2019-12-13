@@ -24,8 +24,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 /**
@@ -34,15 +34,15 @@ import java.util.UUID;
 @Log4j2
 public class OrderService {
 
-    private final URL cashierUrl;
+    private final URI cashierUrl;
 
     /**
      * Sets the cashier URL used for all further methods in this class
      */
     public OrderService() {
         try {
-            cashierUrl = new URL(ApplicationPathResource.CASHIER_URL);
-        } catch (MalformedURLException e) {
+            cashierUrl = new URI(ApplicationPathResource.CASHIER_URL);
+        } catch (URISyntaxException e) {
             throw new IllegalStateException(e);
         }
     }

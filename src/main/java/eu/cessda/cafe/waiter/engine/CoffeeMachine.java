@@ -20,13 +20,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
 import eu.cessda.cafe.waiter.helpers.JsonUtils;
-import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -36,15 +35,14 @@ import java.util.UUID;
 @Log4j2
 public class CoffeeMachine {
 
-    @NonNull
-    private final URL coffeeMachineUrl;
+    private final URI coffeeMachineUrl;
 
     /**
      * Sets up the remote coffee machine
      *
      * @param coffeeMachineUrl The URL of the coffee machine.
      */
-    public CoffeeMachine(URL coffeeMachineUrl) {
+    public CoffeeMachine(URI coffeeMachineUrl) {
         this.coffeeMachineUrl = coffeeMachineUrl;
     }
 
@@ -62,10 +60,10 @@ public class CoffeeMachine {
 
         try {
             // Set the connection url
-            var retrieveJobUrl = new URL(coffeeMachineUrl, "/retrieve-job/" + id);
+            var retrieveJobUrl = new URI(coffeeMachineUrl + "retrieve-job/" + id);
 
             // Read the response to a string
-            var httpConn = (HttpURLConnection) retrieveJobUrl.openConnection();
+            var httpConn = (HttpURLConnection) retrieveJobUrl.toURL().openConnection();
             if (httpConn.getResponseCode() < 400) {
                 response = new String(httpConn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             } else {
@@ -76,7 +74,7 @@ public class CoffeeMachine {
             // Get the response
             responseMap = JsonUtils.getObjectMapper().readValue(response, CoffeeMachineResponse.class);
             if (log.isTraceEnabled()) log.trace(responseMap);
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             throw new IllegalStateException("Malformed URL. This is almost certainly a bug with the application.", e);
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);

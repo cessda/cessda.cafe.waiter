@@ -25,8 +25,8 @@ import eu.cessda.cafe.waiter.resource.ApplicationPathResource;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /*
  * Java Engine class to process logic on /collect-jobs end point
@@ -35,22 +35,22 @@ import java.net.URL;
 @Log4j2
 public class JobService {
 
-    private final URL cashierUrl;
+    private final URI cashierUri;
 
     public JobService() {
         try {
-            cashierUrl = new URL(ApplicationPathResource.CASHIER_URL);
-        } catch (MalformedURLException e) {
+            cashierUri = new URI(ApplicationPathResource.CASHIER_URL);
+        } catch (URISyntaxException e) {
             throw new IllegalStateException(e);
         }
     }
 
     public ApiMessage collectJobs() throws CashierConnectionException {
 
-        log.info("Collecting jobs from cashier {}.", cashierUrl);
+        log.info("Collecting jobs from cashier {}.", cashierUri);
 
         try {
-            var processedJobs = new Cashier(cashierUrl).getProcessedJobs();
+            var processedJobs = new Cashier(cashierUri).getProcessedJobs();
             if (log.isTraceEnabled()) log.trace(processedJobs);
 
             var jobsCollected = 0;
@@ -84,8 +84,8 @@ public class JobService {
             }
             return ApiMessage.collectJobMessage(jobsCollected, jobsNotCollected);
         } catch (IOException e) { // Send the exception up so a 500 can be generated
-            log.error("Error connecting to cashier {}: {}.", cashierUrl, e);
-            throw CashierConnectionException.exceptionMessage(cashierUrl, e);
+            log.error("Error connecting to cashier {}: {}.", cashierUri, e);
+            throw CashierConnectionException.exceptionMessage(cashierUri, e);
         }
     }
 }

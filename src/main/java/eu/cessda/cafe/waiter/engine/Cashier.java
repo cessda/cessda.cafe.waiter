@@ -19,12 +19,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.helpers.JsonUtils;
-import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,14 +33,14 @@ import java.util.UUID;
 @Log4j2
 public class Cashier {
 
-    private final URL orderHistoryEndpoint;
-    private final URL processedJobsEndpoint;
+    private final URI orderHistoryEndpoint;
+    private final URI processedJobsEndpoint;
 
-    public Cashier(@NonNull URL cashierUrl) {
+    public Cashier(URI cashierUrl) {
         try {
-            orderHistoryEndpoint = new URL(cashierUrl, "order-history");
-            processedJobsEndpoint = new URL(cashierUrl, "processed-jobs");
-        } catch (MalformedURLException e) {
+            orderHistoryEndpoint = new URI(cashierUrl.toString() + "order-history");
+            processedJobsEndpoint = new URI(cashierUrl.toString() + "processed-jobs");
+        } catch (URISyntaxException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -54,7 +53,7 @@ public class Cashier {
      */
     public List<Job> getProcessedJobs() throws IOException {
         log.info("Retrieving all processed jobs from {}.", processedJobsEndpoint);
-        return JsonUtils.getObjectMapper().readValue(processedJobsEndpoint, new TypeReference<List<Job>>() {
+        return JsonUtils.getObjectMapper().readValue(processedJobsEndpoint.toURL(), new TypeReference<List<Job>>() {
         });
     }
 
@@ -66,7 +65,7 @@ public class Cashier {
      */
     public List<Order> getOrderHistory() throws IOException {
         log.info("Retrieving all orders from {}.", orderHistoryEndpoint);
-        return JsonUtils.getObjectMapper().readValue(orderHistoryEndpoint, new TypeReference<List<Order>>() {
+        return JsonUtils.getObjectMapper().readValue(orderHistoryEndpoint.toURL(), new TypeReference<List<Order>>() {
         });
     }
 
@@ -80,10 +79,10 @@ public class Cashier {
     public Order getOrderHistory(UUID orderId) throws IOException {
         log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
         try {
-            var orderIdEndpoint = new URL(orderHistoryEndpoint.toString() + "/" + orderId.toString());
-            return JsonUtils.getObjectMapper().readValue(orderIdEndpoint, new TypeReference<Order>() {
+            var orderIdEndpoint = new URI(orderHistoryEndpoint.toString() + "/" + orderId.toString());
+            return JsonUtils.getObjectMapper().readValue(orderIdEndpoint.toURL(), new TypeReference<Order>() {
             });
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             throw new IllegalStateException(e);
         }
     }

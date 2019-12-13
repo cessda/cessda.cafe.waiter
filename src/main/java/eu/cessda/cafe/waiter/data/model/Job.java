@@ -18,7 +18,7 @@ package eu.cessda.cafe.waiter.data.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-import java.net.URL;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ public class Job {
     private OffsetDateTime orderPlaced;
     private OffsetDateTime orderDelivered;
     private int orderSize;
-    private URL machine;
+    private URI machine;
     private OffsetDateTime jobStarted;
     private OffsetDateTime jobRetrieved;
 }

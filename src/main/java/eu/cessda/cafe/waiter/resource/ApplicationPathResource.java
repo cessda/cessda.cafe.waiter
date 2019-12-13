@@ -24,5 +24,5 @@ import javax.ws.rs.core.Application;
 
 @ApplicationPath("/")
 public class ApplicationPathResource extends Application {
-    public static final String CASHIER_URL = "http://cafe-cashier:1336/";
+    public static final String CASHIER_URL = "http://localhost:1336/";
 }
