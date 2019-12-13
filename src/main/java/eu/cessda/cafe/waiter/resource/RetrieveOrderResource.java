@@ -61,10 +61,14 @@ public class RetrieveOrderResource {
     		@PathParam("orderId") UUID orderId,
     		@Context HttpHeaders requestHeaders) {
 
-    	String requestId = requestHeaders.getRequestHeader("X-Request-Id").get(0);
-    	
-    	requestListener.requestInitialized(requestId);
-    	
+        String requestId = requestHeaders.getRequestHeader("X-Request-Id").get(0);
+
+        if (requestId == null) {
+            requestId = UUID.randomUUID().toString();
+        }
+
+        requestListener.requestInitialized(requestId);
+
         if (orderId == null) {
             log.warn("OrderId Invalid.");
             return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
