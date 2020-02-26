@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 
 package eu.cessda.cafe.waiter.service;
 
-import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 import eu.cessda.cafe.waiter.engine.Cashier;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
@@ -60,10 +59,8 @@ public class OrderService {
             var orderHistory = new Cashier(cashierUrl).getOrderHistory();
             if (log.isTraceEnabled()) log.trace(orderHistory);
 
-            for (Order order : orderHistory) {
-                // Update Order data persistently
-                DatabaseClass.getOrder().put(order.getOrderId(), order);
-            }
+            // Update Order data persistently
+            orderHistory.forEach(order -> DatabaseClass.getOrder().put(order.getOrderId(), order));
 
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}", cashierUrl, e);

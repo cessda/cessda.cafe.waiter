@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package eu.cessda.cafe.waiter.resource;
 
 
-import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.DatabaseClass;
 
 import javax.ws.rs.GET;
@@ -25,8 +24,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Java Resource class to expose /order-history end point.
@@ -55,12 +54,7 @@ public class OrderHistoryResource {
     @Path("/{orderId}")
     public Response getOrderHistory(@PathParam("orderId") UUID orderId) {
         var orders = DatabaseClass.getJob().values();
-        var jobList = new ArrayList<Job>();
-        for (var job : orders) {
-            if (job.getOrderId() == orderId) {
-                jobList.add(job);
-            }
-        }
+        var jobList = orders.stream().filter(job -> job.getOrderId() == orderId).collect(Collectors.toList());
         if (jobList.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

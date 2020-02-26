@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class RetrieveOrderResource {
     private static final String ORDER_UNKNOWN = "Order unknown";
     private static final String ORDER_NOT_READY = "Order not ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
-    private RequestListener requestListener = new RequestListener();
+    private final RequestListener requestListener = new RequestListener();
 
     /**
      * Retrieves the specified order
