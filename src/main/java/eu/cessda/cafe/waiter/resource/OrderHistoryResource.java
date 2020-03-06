@@ -16,8 +16,9 @@
 package eu.cessda.cafe.waiter.resource;
 
 
-import eu.cessda.cafe.waiter.database.DatabaseClass;
+import eu.cessda.cafe.waiter.database.Database;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -34,6 +35,13 @@ import java.util.stream.Collectors;
 @Path("/order-history")
 public class OrderHistoryResource {
 
+    private final Database database;
+
+    @Inject
+    public OrderHistoryResource(Database database) {
+        this.database = database;
+    }
+
     /**
      * Gets the order history of the waiter
      *
@@ -41,7 +49,7 @@ public class OrderHistoryResource {
      */
     @GET
     public Response getOrderHistory() {
-        return Response.ok(DatabaseClass.getJob().values()).build();
+        return Response.ok(database.getJob().values()).build();
     }
 
     /**
@@ -53,7 +61,7 @@ public class OrderHistoryResource {
     @GET
     @Path("/{orderId}")
     public Response getOrderHistory(@PathParam("orderId") UUID orderId) {
-        var orders = DatabaseClass.getJob().values();
+        var orders = database.getJob().values();
         var jobList = orders.stream().filter(job -> job.getOrderId() == orderId).collect(Collectors.toList());
         if (jobList.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();

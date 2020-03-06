@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -21,17 +21,22 @@ package eu.cessda.cafe.waiter.database;
 
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
-import lombok.Getter;
-import lombok.experimental.UtilityClass;
+import org.jvnet.hk2.annotations.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@UtilityClass
-public class DatabaseClass {
-    @Getter
+@Service
+public class Database {
     private static final Map<UUID, Order> order = new HashMap<>();
-    @Getter
     private static final Map<UUID, Job> job = new HashMap<>();
+
+    public Map<UUID, Order> getOrder() {
+        return Database.order;
+    }
+
+    public Map<UUID, Job> getJob() {
+        return Database.job;
+    }
 }

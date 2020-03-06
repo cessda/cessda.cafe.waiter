@@ -15,35 +15,38 @@
 
 package eu.cessda.cafe.waiter.service;
 
-import eu.cessda.cafe.waiter.database.DatabaseClass;
-import eu.cessda.cafe.waiter.engine.Cashier;
+import eu.cessda.cafe.waiter.WaiterApplication;
+import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
-import eu.cessda.cafe.waiter.resource.ApplicationPathResource;
+import eu.cessda.cafe.waiter.helpers.CashierHelper;
 import lombok.extern.log4j.Log4j2;
+import org.jvnet.hk2.annotations.Service;
 
+import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 /**
  * Java Engine class to process logic on /retrieve-order/ end points
  */
 @Log4j2
+@Service
 public class OrderService {
 
     private final URI cashierUrl;
+    private final CashierHelper cashierHelper;
+    private final Database database;
 
     /**
      * Sets the cashier URL used for all further methods in this class
      */
-    public OrderService() {
-        try {
-            cashierUrl = new URI(ApplicationPathResource.CASHIER_URL);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
+    @Inject
+    public OrderService(CashierHelper cashierHelper, Database database) {
+        cashierUrl = WaiterApplication.getCashierUrl();
+        this.database = database;
+        this.cashierHelper = cashierHelper;
     }
 
     /**
@@ -56,15 +59,15 @@ public class OrderService {
         log.info("Collecting orders from Cashier {}.", cashierUrl);
 
         try {
-            var orderHistory = new Cashier(cashierUrl).getOrderHistory();
+            var orderHistory = cashierHelper.getOrderHistory();
             if (log.isTraceEnabled()) log.trace(orderHistory);
 
             // Update Order data persistently
-            orderHistory.forEach(order -> DatabaseClass.getOrder().put(order.getOrderId(), order));
+            orderHistory.forEach(order -> database.getOrder().put(order.getOrderId(), order));
 
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}", cashierUrl, e);
-            throw CashierConnectionException.exceptionMessage(cashierUrl, e);
+            throw new CashierConnectionException(cashierUrl, e);
         }
     }
 
@@ -79,14 +82,14 @@ public class OrderService {
         log.info("Collecting order {} from Cashier {}.", orderId, cashierUrl);
         try {
             // Collect only the specified order
-            var order = new Cashier(cashierUrl).getOrderHistory(orderId);
-            DatabaseClass.getOrder().put(order.getOrderId(), order);
+            var order = cashierHelper.getOrderHistory(orderId);
+            database.getOrder().put(order.getOrderId(), order);
         } catch (FileNotFoundException e) {
             log.warn("The order {} was not found on the cashier.", orderId);
             throw e;
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}", cashierUrl, e);
-            throw CashierConnectionException.exceptionMessage(cashierUrl, e);
+            throw new CashierConnectionException(cashierUrl, e);
         }
     }
 }

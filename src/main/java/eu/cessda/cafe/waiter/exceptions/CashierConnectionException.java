@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,25 +15,19 @@
 
 package eu.cessda.cafe.waiter.exceptions;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
  * Represents connection errors to the cashier
  */
 public class CashierConnectionException extends Exception {
-    private CashierConnectionException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     /**
      * Create a CashierConnectionException with a predefined message.
      *
      * @param cashierUrl The cashier url.
-     * @param e          The inner IOException.
-     * @return The generated exception.
+     * @param cause      The cause.
      */
-    public static CashierConnectionException exceptionMessage(URI cashierUrl, IOException e) {
-        return new CashierConnectionException("Error connecting to cashier " + cashierUrl, e);
+    public CashierConnectionException(URI cashierUrl, Throwable cause) {
+        super("Error connecting to cashier " + cashierUrl, cause);
     }
 }

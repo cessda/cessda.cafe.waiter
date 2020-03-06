@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.engine;
+package eu.cessda.cafe.waiter.helpers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
-import eu.cessda.cafe.waiter.helpers.JsonUtils;
 import lombok.extern.log4j.Log4j2;
+import org.jvnet.hk2.annotations.Service;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,18 +31,16 @@ import java.util.UUID;
  * Contains logic to communicate with configured cashiers
  */
 @Log4j2
-public class Cashier {
+@Service
+public class CashierHelper {
 
     private final URI orderHistoryEndpoint;
     private final URI processedJobsEndpoint;
 
-    public Cashier(URI cashierUrl) {
-        try {
-            orderHistoryEndpoint = new URI(cashierUrl.toString() + "order-history");
-            processedJobsEndpoint = new URI(cashierUrl.toString() + "processed-jobs");
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
+    public CashierHelper() {
+        var cashierUrl = WaiterApplication.getCashierUrl();
+        orderHistoryEndpoint = cashierUrl.resolve("order-history/");
+        processedJobsEndpoint = cashierUrl.resolve("processed-jobs/");
     }
 
     /**
@@ -78,12 +76,9 @@ public class Cashier {
      */
     public Order getOrderHistory(UUID orderId) throws IOException {
         log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
-        try {
-            var orderIdEndpoint = new URI(orderHistoryEndpoint.toString() + "/" + orderId.toString());
-            return JsonUtils.getObjectMapper().readValue(orderIdEndpoint.toURL(), new TypeReference<Order>() {
-            });
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
+
+        var orderIdEndpoint = orderHistoryEndpoint.resolve(orderId.toString());
+        return JsonUtils.getObjectMapper().readValue(orderIdEndpoint.toURL(), new TypeReference<Order>() {
+        });
     }
 }

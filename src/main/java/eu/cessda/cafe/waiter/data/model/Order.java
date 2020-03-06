@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import java.util.UUID;
 
 @Data
 public class Order {
-    UUID orderId;
-    OffsetDateTime orderPlaced;
-    int orderSize;
-    List<Job> jobs;
-    OffsetDateTime orderDelivered;
+    private UUID orderId;
+    private OffsetDateTime orderPlaced;
+    private int orderSize;
+    private List<Job> jobs;
+    private OffsetDateTime orderDelivered;
 }

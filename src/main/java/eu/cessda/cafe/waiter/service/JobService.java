@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,34 +15,39 @@
 
 package eu.cessda.cafe.waiter.service;
 
+import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
-import eu.cessda.cafe.waiter.data.model.Job;
-import eu.cessda.cafe.waiter.database.DatabaseClass;
-import eu.cessda.cafe.waiter.engine.Cashier;
-import eu.cessda.cafe.waiter.engine.CoffeeMachine;
+import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
-import eu.cessda.cafe.waiter.resource.ApplicationPathResource;
+import eu.cessda.cafe.waiter.helpers.CashierHelper;
+import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
 import lombok.extern.log4j.Log4j2;
+import org.jvnet.hk2.annotations.Service;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * Java Engine class to process logic on /collect-jobs end point
  */
 
 @Log4j2
+@Service
 public class JobService {
 
     private final URI cashierUri;
+    private final CashierHelper cashierHelper;
+    private final CoffeeMachineHelper coffeeMachineHelper;
+    private final Database database;
 
-    public JobService() {
-        try {
-            cashierUri = new URI(ApplicationPathResource.CASHIER_URL);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
+    @Inject
+    public JobService(CashierHelper cashierHelper, CoffeeMachineHelper coffeeMachineHelper, Database database) {
+        this.cashierUri = WaiterApplication.getCashierUrl();
+        this.cashierHelper = cashierHelper;
+        this.coffeeMachineHelper = coffeeMachineHelper;
+        this.database = database;
     }
 
     public ApiMessage collectJobs() throws CashierConnectionException {
@@ -50,42 +55,39 @@ public class JobService {
         log.info("Collecting jobs from cashier {}.", cashierUri);
 
         try {
-            var processedJobs = new Cashier(cashierUri).getProcessedJobs();
+            var processedJobs = cashierHelper.getProcessedJobs();
             if (log.isTraceEnabled()) log.trace(processedJobs);
 
-            var jobsCollected = 0;
-            var jobsNotCollected = 0;
+            AtomicInteger jobsCollected = new AtomicInteger();
+            AtomicInteger jobsNotCollected = new AtomicInteger();
 
-            for (Job job : processedJobs) {
-                // Start retrieving the job if not retrieved
-                if (!DatabaseClass.getJob().containsKey(job.getJobId())) {
+            // Start retrieving the job if not retrieved
+            processedJobs.parallelStream().filter(job -> !database.getJob().containsKey(job.getJobId())).forEach(job -> {
+                var coffeeMachineResponse = coffeeMachineHelper.retrieveJob(job.getMachine(), job.getJobId());
+                if (coffeeMachineResponse != null) {
+                    // Copy known variables from the coffee machine
+                    job.setJobId(coffeeMachineResponse.getJobId());
+                    job.setJobStarted(coffeeMachineResponse.getJobStarted());
+                    job.setProduct(coffeeMachineResponse.getProduct());
 
-                    var coffeeMachineResponse = new CoffeeMachine(job.getMachine()).retrieveJob(job.getJobId());
+                    // Set job as retrieved at the current time
+                    job.setJobRetrieved(coffeeMachineResponse.getJobRetrieved());
 
-                    if (coffeeMachineResponse != null) {
-                        // Copy known variables from the coffee machine
-                        job.setJobId(coffeeMachineResponse.getJobId());
-                        job.setJobStarted(coffeeMachineResponse.getJobStarted());
-                        job.setProduct(coffeeMachineResponse.getProduct());
+                    // Add the job to the persistent data store
+                    database.getJob().put(job.getJobId(), job);
 
-                        // Set job as retrieved at the current time
-                        job.setJobRetrieved(coffeeMachineResponse.getJobRetrieved());
-
-                        // Add the job to the persistent data store
-                        DatabaseClass.getJob().put(job.getJobId(), job);
-
-                        // Set the job as collected
-                        log.info("Collected job {}.", job.getJobId());
-                        jobsCollected++;
-                    } else {
-                        jobsNotCollected++;
-                    }
+                    // Set the job as collected
+                    log.info("Collected job {}.", job.getJobId());
+                    jobsCollected.getAndIncrement();
+                } else {
+                    jobsNotCollected.getAndIncrement();
                 }
-            }
-            return ApiMessage.collectJobMessage(jobsCollected, jobsNotCollected);
+            });
+
+            return ApiMessage.collectJobMessage(jobsCollected.get(), jobsNotCollected.get());
         } catch (IOException e) { // Send the exception up so a 500 can be generated
             log.error("Error connecting to cashier {}: {}.", cashierUri, e);
-            throw CashierConnectionException.exceptionMessage(cashierUri, e);
+            throw new CashierConnectionException(cashierUri, e);
         }
     }
 }

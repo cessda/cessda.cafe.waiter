@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -34,11 +35,19 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
+
+    JobService jobService;
+
+    @Inject
+    public JobResource(JobService jobService) {
+        this.jobService = jobService;
+    }
+
     // Return message from a post method on /collect-jobs
     @POST
     public Response postCollectJobs() {
         try {
-            return Response.ok(new JobService().collectJobs()).build();
+            return Response.ok(jobService.collectJobs()).build();
         } catch (CashierConnectionException e) { // In the case that the cashier cannot be contacted
             return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
         }

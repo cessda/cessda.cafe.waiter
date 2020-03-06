@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.engine;
+package eu.cessda.cafe.waiter.helpers;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
-import eu.cessda.cafe.waiter.helpers.JsonUtils;
 import lombok.extern.log4j.Log4j2;
+import org.jvnet.hk2.annotations.Service;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -33,35 +32,24 @@ import java.util.UUID;
  * Holds methods to talk to remote coffee machines
  */
 @Log4j2
-public class CoffeeMachine {
-
-    private final URI coffeeMachineUrl;
-
-    /**
-     * Sets up the remote coffee machine
-     *
-     * @param coffeeMachineUrl The URL of the coffee machine.
-     */
-    public CoffeeMachine(URI coffeeMachineUrl) {
-        this.coffeeMachineUrl = coffeeMachineUrl;
-    }
-
+@Service
+public class CoffeeMachineHelper {
     /**
      * Attempt to retrieve the specified job from the remote coffee machine.
      *
      * @param id The UUID of the coffee to retrieve.
      * @return The response from the remote coffee machine, or null if an error occurred.
      */
-    public CoffeeMachineResponse retrieveJob(UUID id) {
+    public CoffeeMachineResponse retrieveJob(URI coffeeMachineUrl, UUID id) {
         log.info("Retrieving job {} from {}.", id, coffeeMachineUrl);
 
         CoffeeMachineResponse responseMap = null;
         String response = "";
 
-        try {
-            // Set the connection url
-            var retrieveJobUrl = new URI(coffeeMachineUrl + "retrieve-job/" + id);
+        // Set the connection url
+        var retrieveJobUrl = coffeeMachineUrl.resolve("retrieve-job/").resolve(id.toString());
 
+        try {
             // Read the response to a string
             var httpConn = (HttpURLConnection) retrieveJobUrl.toURL().openConnection();
             if (httpConn.getResponseCode() < 400) {
@@ -74,13 +62,11 @@ public class CoffeeMachine {
             // Get the response
             responseMap = JsonUtils.getObjectMapper().readValue(response, CoffeeMachineResponse.class);
             if (log.isTraceEnabled()) log.trace(responseMap);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Malformed URL. This is almost certainly a bug with the application.", e);
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);
         } catch (IOException e) {
             // Parse the message from the coffee machine to determine what should be logged
-            if (!parseCoffeeMachineResponse(response, id)) {
+            if (!parseCoffeeMachineResponse(coffeeMachineUrl, response, id)) {
                 log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
             }
         }
@@ -95,7 +81,7 @@ public class CoffeeMachine {
      * @param id       The jobId.
      * @return true if the message was parsed successfully, false otherwise.
      */
-    private boolean parseCoffeeMachineResponse(String response, UUID id) {
+    private boolean parseCoffeeMachineResponse(URI coffeeMachineUrl, String response, UUID id) {
         try {
             var message = JsonUtils.getObjectMapper().readValue(response, ApiMessage.class);
             if (message.getMessage().equalsIgnoreCase("job unknown")) {
