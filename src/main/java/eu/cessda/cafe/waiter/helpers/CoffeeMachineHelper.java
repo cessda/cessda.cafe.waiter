@@ -44,7 +44,7 @@ public class CoffeeMachineHelper {
         log.info("Retrieving job {} from {}.", id, coffeeMachineUrl);
 
         CoffeeMachineResponse responseMap = null;
-        String response = "";
+        String response = null;
 
         // Set the connection url
         var retrieveJobUrl = coffeeMachineUrl.resolve("retrieve-job/").resolve(id.toString());
@@ -53,9 +53,15 @@ public class CoffeeMachineHelper {
             // Read the response to a string
             var httpConn = (HttpURLConnection) retrieveJobUrl.toURL().openConnection();
             if (httpConn.getResponseCode() < 400) {
-                response = new String(httpConn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                try (var inputStream = httpConn.getInputStream()) {
+                    response = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                }
             } else {
-                response = new String(httpConn.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+                try (var errorStream = httpConn.getErrorStream()) {
+                    if (errorStream != null) {
+                        response = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
+                    }
+                }
                 throw new IOException("Server returned code " + httpConn.getResponseCode());
             }
 
@@ -83,17 +89,19 @@ public class CoffeeMachineHelper {
      */
     private boolean parseCoffeeMachineResponse(URI coffeeMachineUrl, String response, UUID id) {
         try {
-            var message = JsonUtils.getObjectMapper().readValue(response, ApiMessage.class);
-            if (message.getMessage().equalsIgnoreCase("job unknown")) {
-                log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
-            } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
-                log.info("Job {} is not ready on coffee machine {}.", id, coffeeMachineUrl);
-            } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
-                log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
-            } else { // Default handling
-                log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.getMessage());
+            if (response != null) {
+                var message = JsonUtils.getObjectMapper().readValue(response, ApiMessage.class);
+                if (message.getMessage().equalsIgnoreCase("job unknown")) {
+                    log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
+                } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
+                    log.info("Job {} is not ready on coffee machine {}.", id, coffeeMachineUrl);
+                } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
+                    log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
+                } else { // Default handling
+                    log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.getMessage());
+                }
+                return true;
             }
-            return true;
         } catch (IOException e) {
             log.error("Response from {} couldn't be parsed.", coffeeMachineUrl, e);
         }
