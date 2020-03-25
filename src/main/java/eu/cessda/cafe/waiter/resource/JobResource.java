@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class JobResource {
 
-    JobService jobService;
+    private final JobService jobService;
 
     @Inject
     public JobResource(JobService jobService) {

@@ -19,6 +19,9 @@ package eu.cessda.cafe.waiter;
  * Setup the Application path for the program.
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Strings;
 import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.helpers.CashierHelper;
@@ -34,6 +37,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.time.Duration;
 
 @Log4j2
 @ApplicationPath("/")
@@ -56,6 +61,18 @@ public class WaiterApplication extends ResourceConfig {
                 bindAsContract(Database.class);
                 bindAsContract(JobService.class);
                 bindAsContract(OrderService.class);
+                bind(HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(10))
+                        .followRedirects(HttpClient.Redirect.NORMAL).build())
+                        .to(HttpClient.class);
+                bind(getObjectMapper()).to(ObjectMapper.class);
+            }
+
+            private ObjectMapper getObjectMapper() {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                return mapper;
             }
         });
     }
@@ -69,7 +86,6 @@ public class WaiterApplication extends ResourceConfig {
                 isUrl = true;
                 log.info("Using cashier {}", cashierUrl);
             }
-
         } catch (MalformedURLException | URISyntaxException e) {
             log.warn("{} is not a valid URL, not configuring", cashierUrl);
         }

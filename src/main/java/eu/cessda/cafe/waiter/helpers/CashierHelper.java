@@ -16,6 +16,7 @@
 package eu.cessda.cafe.waiter.helpers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
@@ -37,10 +38,14 @@ public class CashierHelper {
     private final URI orderHistoryEndpoint;
     private final URI processedJobsEndpoint;
 
-    public CashierHelper() {
+    private final ObjectMapper objectMapper;
+
+    public CashierHelper(ObjectMapper objectMapper) {
         var cashierUrl = WaiterApplication.getCashierUrl();
         orderHistoryEndpoint = cashierUrl.resolve("order-history/");
         processedJobsEndpoint = cashierUrl.resolve("processed-jobs/");
+
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -51,7 +56,7 @@ public class CashierHelper {
      */
     public List<Job> getProcessedJobs() throws IOException {
         log.info("Retrieving all processed jobs from {}.", processedJobsEndpoint);
-        return JsonUtils.getObjectMapper().readValue(processedJobsEndpoint.toURL(), new TypeReference<List<Job>>() {
+        return objectMapper.readValue(processedJobsEndpoint.toURL(), new TypeReference<List<Job>>() {
         });
     }
 
@@ -63,7 +68,7 @@ public class CashierHelper {
      */
     public List<Order> getOrderHistory() throws IOException {
         log.info("Retrieving all orders from {}.", orderHistoryEndpoint);
-        return JsonUtils.getObjectMapper().readValue(orderHistoryEndpoint.toURL(), new TypeReference<List<Order>>() {
+        return objectMapper.readValue(orderHistoryEndpoint.toURL(), new TypeReference<List<Order>>() {
         });
     }
 
@@ -78,7 +83,7 @@ public class CashierHelper {
         log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
 
         var orderIdEndpoint = orderHistoryEndpoint.resolve(orderId.toString());
-        return JsonUtils.getObjectMapper().readValue(orderIdEndpoint.toURL(), new TypeReference<Order>() {
+        return objectMapper.readValue(orderIdEndpoint.toURL(), new TypeReference<Order>() {
         });
     }
 }

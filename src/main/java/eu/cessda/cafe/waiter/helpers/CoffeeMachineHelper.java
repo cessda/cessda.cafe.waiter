@@ -17,15 +17,18 @@ package eu.cessda.cafe.waiter.helpers;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
 import lombok.extern.log4j.Log4j2;
 import org.jvnet.hk2.annotations.Service;
 
+import javax.inject.Inject;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.UUID;
 
 /**
@@ -34,6 +37,16 @@ import java.util.UUID;
 @Log4j2
 @Service
 public class CoffeeMachineHelper {
+
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
+
+    @Inject
+    public CoffeeMachineHelper(HttpClient httpClient, ObjectMapper objectMapper) {
+        this.httpClient = httpClient;
+        this.objectMapper = objectMapper;
+    }
+
     /**
      * Attempt to retrieve the specified job from the remote coffee machine.
      *
@@ -51,22 +64,18 @@ public class CoffeeMachineHelper {
 
         try {
             // Read the response to a string
-            var httpConn = (HttpURLConnection) retrieveJobUrl.toURL().openConnection();
-            if (httpConn.getResponseCode() < 400) {
-                try (var inputStream = httpConn.getInputStream()) {
-                    response = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                }
+            var httpRequest = HttpRequest.newBuilder(retrieveJobUrl).build();
+            var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            response = httpResponse.body();
+
+            if (httpResponse.statusCode() < 400) {
+                responseMap = objectMapper.readValue(response, CoffeeMachineResponse.class);
             } else {
-                try (var errorStream = httpConn.getErrorStream()) {
-                    if (errorStream != null) {
-                        response = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
-                    }
-                }
-                throw new IOException("Server returned code " + httpConn.getResponseCode());
+                throw new IOException("Server returned code " + httpResponse.statusCode());
             }
 
             // Get the response
-            responseMap = JsonUtils.getObjectMapper().readValue(response, CoffeeMachineResponse.class);
+
             if (log.isTraceEnabled()) log.trace(responseMap);
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine:", e);
@@ -75,6 +84,9 @@ public class CoffeeMachineHelper {
             if (!parseCoffeeMachineResponse(coffeeMachineUrl, response, id)) {
                 log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
             }
+        } catch (InterruptedException e) {
+            log.warn("Interrupted! HTTP request cancelled:", e);
+            Thread.currentThread().interrupt();
         }
         return responseMap;
     }
@@ -90,7 +102,7 @@ public class CoffeeMachineHelper {
     private boolean parseCoffeeMachineResponse(URI coffeeMachineUrl, String response, UUID id) {
         try {
             if (response != null) {
-                var message = JsonUtils.getObjectMapper().readValue(response, ApiMessage.class);
+                var message = objectMapper.readValue(response, ApiMessage.class);
                 if (message.getMessage().equalsIgnoreCase("job unknown")) {
                     log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
                 } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
