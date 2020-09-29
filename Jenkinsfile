@@ -17,7 +17,7 @@ pipeline {
         stage('Pull SDK Docker Image') {
             agent {
                 docker {
-                    image 'maven:3-jdk-11'
+                    image 'openjdk:11-jdk'
                     reuseNode true
                 }
             }
@@ -25,7 +25,7 @@ pipeline {
                 stage('Build Project') {
                     steps {
                         withMaven {
-                            sh 'export PATH=$MVN_CMD_DIR:$PATH && mvn clean install'
+                            sh './mvnw clean install'
                         }
                     }
                     when { branch 'master' }
@@ -34,7 +34,7 @@ pipeline {
                 stage('Test Project') {
                     steps {
                         withMaven {
-                            sh 'export PATH=$MVN_CMD_DIR:$PATH && mvn clean test'
+                            sh './mvnw clean test'
                         }
                     }
                     when { not { branch 'master' } }
@@ -48,7 +48,7 @@ pipeline {
                     steps {
                         withSonarQubeEnv('cessda-sonar') {
                             withMaven {
-                                sh 'export PATH=$MVN_CMD_DIR:$PATH && mvn sonar:sonar'
+                                sh './mvnw sonar:sonar'
                             }
                         }
                     }
@@ -68,7 +68,7 @@ pipeline {
             steps {
                 sh 'gcloud auth configure-docker'
                 withMaven {
-                    sh "export PATH=$MVN_CMD_DIR:$PATH && mvn jib:build -Djib.console=plain -Dimage=${image_tag}"
+                    sh "./mvnw jib:build -Djib.console=plain -Dimage=${image_tag}"
                 }
                 sh("gcloud container images add-tag ${IMAGE_TAG} ${docker_repo}/${product_name}-${module_name}:${env.BRANCH_NAME}-latest")
             }
