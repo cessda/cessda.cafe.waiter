@@ -15,10 +15,10 @@
 
 package eu.cessda.cafe.waiter.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.WaiterApplication;
-import eu.cessda.cafe.waiter.database.Database;
+import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
-import eu.cessda.cafe.waiter.helpers.CashierHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jvnet.hk2.annotations.Service;
 
@@ -35,61 +35,40 @@ import java.util.UUID;
 @Service
 public class OrderService {
 
-    private final URI cashierUrl;
-    private final CashierHelper cashierHelper;
-    private final Database database;
+    private final ObjectMapper objectMapper;
+
+    private final URI orderHistoryEndpoint;
 
     /**
      * Sets the cashier URL used for all further methods in this class
      */
     @Inject
-    public OrderService(CashierHelper cashierHelper, Database database) {
-        cashierUrl = WaiterApplication.getCashierUrl();
-        this.database = database;
-        this.cashierHelper = cashierHelper;
-    }
-
-    /**
-     * Gets the order history for all orders from the cashier
-     *
-     * @throws CashierConnectionException if a connection error occurred connecting to the cashier
-     */
-    public void getOrders() throws CashierConnectionException {
-
-        log.info("Collecting orders from Cashier {}.", cashierUrl);
-
-        try {
-            var orderHistory = cashierHelper.getOrderHistory();
-            if (log.isTraceEnabled()) log.trace(orderHistory);
-
-            // Update Order data persistently
-            orderHistory.forEach(order -> database.getOrder().put(order.getOrderId(), order));
-
-        } catch (IOException e) { // Send the exception up so a 500 can be generated
-            log.error("Error connecting to cashier {}: {}", cashierUrl, e);
-            throw new CashierConnectionException(cashierUrl, e);
-        }
+    public OrderService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        orderHistoryEndpoint = WaiterApplication.getCashierUrl().resolve("order-history/");
     }
 
     /**
      * Gets the order history for an order with a specific orderId from the cashier
      *
      * @param orderId The orderId to get
-     * @throws CashierConnectionException if a connection error occured connecting to the cashier
+     * @return the order associated with the order ID
+     * @throws CashierConnectionException if a connection error occurred connecting to the cashier
      * @throws FileNotFoundException      if the order was not found on the cashier
      */
-    public void getOrders(UUID orderId) throws CashierConnectionException, FileNotFoundException {
-        log.info("Collecting order {} from Cashier {}.", orderId, cashierUrl);
+    public Order getOrders(UUID orderId) throws CashierConnectionException, FileNotFoundException {
+        log.info("Collecting order {} from Cashier {}.", orderId, WaiterApplication.getCashierUrl());
         try {
             // Collect only the specified order
-            var order = cashierHelper.getOrderHistory(orderId);
-            database.getOrder().put(order.getOrderId(), order);
+            log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
+            var orderIdEndpoint = orderHistoryEndpoint.resolve(orderId.toString());
+            return objectMapper.readValue(orderIdEndpoint.toURL(), Order.class);
         } catch (FileNotFoundException e) {
             log.warn("The order {} was not found on the cashier.", orderId);
             throw e;
         } catch (IOException e) { // Send the exception up so a 500 can be generated
-            log.error("Error connecting to cashier {}: {}", cashierUrl, e);
-            throw new CashierConnectionException(cashierUrl, e);
+            log.error("Error connecting to cashier {}: {}", WaiterApplication.getCashierUrl(), e);
+            throw new CashierConnectionException(WaiterApplication.getCashierUrl(), e);
         }
     }
 }

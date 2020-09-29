@@ -1,15 +1,16 @@
 # This image uses the Tomcat server
-FROM tomcat:9.0-jdk11 AS base
-WORKDIR /usr/local/tomcat/webapps
-EXPOSE 8080
-
 # Built using Maven 3 and JDK 11
+
+# Compile
 FROM maven:3-jdk-11 AS build
 WORKDIR /src
+COPY pom.xml .
+RUN mvn dependency:resolve && mvn dependency:resolve-plugins
 COPY . .
-RUN mvn package
+RUN mvn verify
 
-FROM base AS final
-RUN rm -r /usr/local/tomcat/webapps/*
+# Package
+FROM tomcat:9.0-jdk11 AS final
+WORKDIR /usr/local/tomcat/webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /src/target/*.war /usr/local/tomcat/webapps/ROOT.war
-ENTRYPOINT ["catalina.sh", "run"]

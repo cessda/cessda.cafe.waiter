@@ -22,9 +22,7 @@ package eu.cessda.cafe.waiter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.Strings;
 import eu.cessda.cafe.waiter.database.Database;
-import eu.cessda.cafe.waiter.helpers.CashierHelper;
 import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
@@ -56,15 +54,17 @@ public class WaiterApplication extends ResourceConfig {
         register(new AbstractBinder() {
             @Override
             protected void configure() {
-                bindAsContract(CashierHelper.class);
+                // Internal dependencies
                 bindAsContract(CoffeeMachineHelper.class);
                 bindAsContract(Database.class);
                 bindAsContract(JobService.class);
                 bindAsContract(OrderService.class);
+
+                // HTTP Client and object mapper
                 bind(HttpClient.newBuilder()
                         .connectTimeout(Duration.ofSeconds(10))
-                        .followRedirects(HttpClient.Redirect.NORMAL).build())
-                        .to(HttpClient.class);
+                        .followRedirects(HttpClient.Redirect.NORMAL).build()
+                ).to(HttpClient.class);
                 bind(getObjectMapper()).to(ObjectMapper.class);
             }
 
@@ -79,20 +79,19 @@ public class WaiterApplication extends ResourceConfig {
 
     private static void initCashierUrl() {
         String cashierUrl = System.getenv("CASHIER_URL");
-        boolean isUrl = false;
         try {
-            if (!Strings.isNullOrEmpty(cashierUrl)) {
+            if (cashierUrl != null && !cashierUrl.isEmpty()) {
                 WaiterApplication.cashierUrl = new URL(cashierUrl).toURI();
-                isUrl = true;
                 log.info("Using cashier {}", cashierUrl);
+                return;
             }
         } catch (MalformedURLException | URISyntaxException e) {
             log.warn("{} is not a valid URL, not configuring", cashierUrl);
         }
-        if (!isUrl) {
-            log.info("Using default cashier {}", DEFAULT_CASHIER_URL);
-            WaiterApplication.cashierUrl = DEFAULT_CASHIER_URL;
-        }
+
+        // This makes sure a cashier URL is always configured
+        log.info("Using default cashier {}", DEFAULT_CASHIER_URL);
+        WaiterApplication.cashierUrl = DEFAULT_CASHIER_URL;
     }
 
     public static URI getCashierUrl() {

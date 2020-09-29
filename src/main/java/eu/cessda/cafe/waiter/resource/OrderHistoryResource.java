@@ -62,9 +62,9 @@ public class OrderHistoryResource {
     @Path("/{orderId}")
     public Response getOrderHistory(@PathParam("orderId") UUID orderId) {
         var orders = database.getJob().values();
-        var jobList = orders.stream().filter(job -> job.getOrderId() == orderId).collect(Collectors.toList());
+        var jobList = orders.stream().filter(job -> job.getOrderId().equals(orderId)).collect(Collectors.toList());
         if (jobList.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.ok(jobList).build();
     }

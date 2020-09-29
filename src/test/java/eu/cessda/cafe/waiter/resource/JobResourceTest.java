@@ -28,41 +28,38 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 
-public class JobResourceTest {
+class JobResourceTest {
 
     private static final String MOCKED = "Mocked!";
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    private JobService jobService;
-    private JobResource jobResource;
-
-    public JobResourceTest() {
-        jobService = Mockito.mock(JobService.class);
-        jobResource = new JobResource(jobService);
-    }
 
     @Test
-    public void shouldReturnApiMessageOnSuccess() throws CashierConnectionException {
+    void shouldReturnApiMessageOnSuccess() throws CashierConnectionException {
         // Setup
+        var jobService = Mockito.mock(JobService.class);
+        var jobResource = new JobResource(jobService);
         Mockito.doReturn(new ApiMessage(MOCKED)).when(jobService).collectJobs();
 
         // Act
-        var response = jobResource.postCollectJobs();
-
-        Assert.assertEquals(ApiMessage.class, response.getEntity().getClass());
-        ApiMessage message = (ApiMessage) response.getEntity();
-        Assert.assertEquals(MOCKED, message.getMessage());
+        try (var response = jobResource.postCollectJobs()) {
+            Assert.assertEquals(ApiMessage.class, response.getEntity().getClass());
+            ApiMessage message = (ApiMessage) response.getEntity();
+            Assert.assertEquals(MOCKED, message.getMessage());
+        }
     }
 
     @Test
-    public void shouldReturnServerErrorOnCasherConnectionError() throws CashierConnectionException {
+    void shouldReturnServerErrorOnCasherConnectionError() throws CashierConnectionException {
         // Setup
+        var jobService = Mockito.mock(JobService.class);
+        var jobResource = new JobResource(jobService);
         Mockito.doThrow(new CashierConnectionException(URI.create("http://localhost:1336/"),
                 new IOException(MOCKED))).when(jobService).collectJobs();
 
         // Act
-        var response = jobResource.postCollectJobs();
-
-        Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        try (var response = jobResource.postCollectJobs()) {
+            Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        }
     }
 }

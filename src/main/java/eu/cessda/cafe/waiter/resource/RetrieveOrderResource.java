@@ -16,7 +16,7 @@
 package eu.cessda.cafe.waiter.resource;
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
-import eu.cessda.cafe.waiter.data.model.Order;
+import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import eu.cessda.cafe.waiter.message.RequestListener;
@@ -39,7 +39,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -75,10 +74,10 @@ public class RetrieveOrderResource {
     @GET
     @Path("/{orderId}")
     public Response getOrder(@PathParam("orderId") UUID orderId, @Context HttpHeaders requestHeaders) {
-        Response result;
 
         List<String> requestHeader = requestHeaders.getRequestHeader("X-Request-Id");
         String requestId;
+
         if (requestHeader == null) {
             requestId = UUID.randomUUID().toString();
         } else {
@@ -89,78 +88,68 @@ public class RetrieveOrderResource {
 
         if (orderId == null) {
             log.warn("OrderId Invalid.");
-            result = Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
         } else {// Is the order already delivered
             var order = database.getOrder().get(orderId);
             if (order != null && order.getOrderDelivered() != null) {
                 // The order has already been delivered
                 log.info("Order {} already retrieved.", order.getOrderId());
-                result = Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
-            } else {// Update the orders from the cashier
-                result = retrieveOrderFromCashier(orderId);
-            }
-        }
-        return result;
-    }
-
-    private Response retrieveOrderFromCashier(@PathParam("orderId") UUID orderId) {
-        Response result;
-        try {
-            orderService.getOrders(orderId);
-            jobService.collectJobs();
-
-            var order = database.getOrder().get(orderId);
-
-            // check conditions whether any open jobs are done and orders delivered
-            if (order == null) {
-                // The order doesn't exist
-                throw new FileNotFoundException(orderId.toString());
+                return Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
             } else {
-                // The order exists, find what state it's in
-                result = getOrderState(order);
+                // Update the orders from the cashier
+                return retrieveOrderFromCashier(orderId);
             }
-
-        } catch (CashierConnectionException e) {
-            result = Response.serverError().entity(new ApiMessage(e.getMessage())).build();
-        } catch (FileNotFoundException e) {
-            log.warn("Order {} unknown.", orderId);
-            result = Response.status(Response.Status.NOT_FOUND).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
-        return result;
     }
 
     /**
-     * Gets the state of the order.
+     * Retrieves an order from the cashier and checks the state of the order.
+     * <p/>
+     * This method asks the cashier to get all of the jobs associated with an order, and then checks to see if all
+     * the jobs associated with the order have been retrieved from the coffee machines.
+     * <p/>
+     * If all of the jobs associated with an order have been delivered to the waiter, then the order is marked as
+     * delivered and returned to the customer.
      *
-     * @param order The order to check.
-     * @return a response containing the order if all jobs are delivered,
-     * otherwise a message stating the order is not ready.
+     * @param orderId The id of the order to check.
+     * @return A response containing the state of the order.
      */
-    private Response getOrderState(Order order) {
-        Response result;
+    private Response retrieveOrderFromCashier(UUID orderId) {
+        try {
+            var order = orderService.getOrders(orderId);
 
-        // Does the order have all it's jobs retrieved
-        AtomicBoolean success = new AtomicBoolean(true);
-        order.getJobs().forEach(job -> {
-            var retrievedJob = database.getJob().get(job.getJobId());
-            if (retrievedJob != null) {
-                log.info("Retrieved job {} of order {}.", retrievedJob.getJobId(), order.getOrderId());
-            } else {
-                log.warn("Couldn't retrieve job {} of order {}.", job.getJobId(), order.getOrderId());
-                success.set(false);
+            // check conditions whether any open jobs are done and orders delivered
+            database.getOrder().put(order.getOrderId(), order);
+
+            // Collect all processed jobs from the cashier and retrieve them from the coffee machine
+            jobService.collectJobs();
+
+            // Does the order have all it's jobs retrieved?
+            boolean success = true;
+            for (Job job : order.getJobs()) {
+                var retrievedJob = database.getJob().get(job.getJobId());
+                if (retrievedJob != null) {
+                    log.info("Retrieved job {} of order {}.", retrievedJob.getJobId(), order.getOrderId());
+                } else {
+                    log.warn("Couldn't retrieve job {} of order {}.", job.getJobId(), order.getOrderId());
+                    success = false;
+                }
             }
-        });
-        if (!success.get()) {
-            // Not all jobs are retrieved
-            log.info("Order {} not ready.", order.getOrderId());
-            result = Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage(ORDER_NOT_READY)).build();
-        } else {
-            // Deliver the order
-            order.setOrderDelivered(OffsetDateTime.now(ZoneId.from(ZoneOffset.UTC)));
-            database.getOrder().replace(order.getOrderId(), order);
-            log.info("Order {} retrieved.", order.getOrderId());
-            result = Response.ok().entity(order).build();
+            if (success) {
+                // Deliver the order
+                order.setOrderDelivered(OffsetDateTime.now(ZoneId.from(ZoneOffset.UTC)));
+                log.info("Order {} retrieved.", order.getOrderId());
+                return Response.ok().entity(order).build();
+            } else {
+                // Not all jobs are retrieved
+                log.info("Order {} not ready.", order.getOrderId());
+                return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage(ORDER_NOT_READY)).build();
+            }
+        } catch (CashierConnectionException e) {
+            return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+        } catch (FileNotFoundException e) {
+            log.warn("Order {} unknown.", orderId);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
-        return result;
     }
 }

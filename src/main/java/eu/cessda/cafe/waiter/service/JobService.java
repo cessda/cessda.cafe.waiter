@@ -15,11 +15,13 @@
 
 package eu.cessda.cafe.waiter.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
+import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
-import eu.cessda.cafe.waiter.helpers.CashierHelper;
 import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jvnet.hk2.annotations.Service;
@@ -27,6 +29,7 @@ import org.jvnet.hk2.annotations.Service;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -38,16 +41,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JobService {
 
     private final URI cashierUri;
-    private final CashierHelper cashierHelper;
     private final CoffeeMachineHelper coffeeMachineHelper;
     private final Database database;
+    private final ObjectMapper objectMapper;
+
+    private final URI processedJobsEndpoint;
 
     @Inject
-    public JobService(CashierHelper cashierHelper, CoffeeMachineHelper coffeeMachineHelper, Database database) {
+    public JobService(CoffeeMachineHelper coffeeMachineHelper, Database database, ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.cashierUri = WaiterApplication.getCashierUrl();
-        this.cashierHelper = cashierHelper;
         this.coffeeMachineHelper = coffeeMachineHelper;
         this.database = database;
+
+        processedJobsEndpoint = this.cashierUri.resolve("processed-jobs/");
     }
 
     public ApiMessage collectJobs() throws CashierConnectionException {
@@ -55,8 +62,13 @@ public class JobService {
         log.info("Collecting jobs from cashier {}.", cashierUri);
 
         try {
-            var processedJobs = cashierHelper.getProcessedJobs();
-            if (log.isTraceEnabled()) log.trace(processedJobs);
+            log.info("Retrieving all processed jobs from {}.", processedJobsEndpoint);
+            var processedJobs = objectMapper.<List<Job>>readValue(processedJobsEndpoint.toURL(), new TypeReference<>() {
+            });
+
+            if (log.isTraceEnabled()) {
+                log.trace(processedJobs);
+            }
 
             AtomicInteger jobsCollected = new AtomicInteger();
             AtomicInteger jobsNotCollected = new AtomicInteger();
