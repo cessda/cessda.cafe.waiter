@@ -23,20 +23,20 @@ import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
 import org.jvnet.hk2.annotations.Service;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class Database {
-    private static final Map<UUID, Order> order = new ConcurrentHashMap<>();
-    private static final Map<UUID, Job> job = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Order> order = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Job> job = new ConcurrentHashMap<>();
 
-    public Map<UUID, Order> getOrder() {
-        return Database.order;
+    public ConcurrentMap<UUID, Order> getOrder() {
+        return order;
     }
 
-    public Map<UUID, Job> getJob() {
-        return Database.job;
+    public ConcurrentMap<UUID, Job> getJob() {
+        return job;
     }
 }

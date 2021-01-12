@@ -13,14 +13,20 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.exceptions;
+package eu.cessda.cafe.waiter.service;
+
+import lombok.Getter;
 
 import java.net.URI;
 
 /**
  * Represents connection errors to the cashier
  */
+@Getter
 public class CashierConnectionException extends Exception {
+
+    private final URI cashierUrl;
+
     /**
      * Create a CashierConnectionException with a predefined message.
      *
@@ -28,6 +34,8 @@ public class CashierConnectionException extends Exception {
      * @param cause      The cause.
      */
     public CashierConnectionException(URI cashierUrl, Throwable cause) {
-        super("Error connecting to cashier " + cashierUrl, cause);
+        super("Error connecting to cashier " + cashierUrl + ": " + cause.toString(), cause);
+
+        this.cashierUrl = cashierUrl;
     }
 }

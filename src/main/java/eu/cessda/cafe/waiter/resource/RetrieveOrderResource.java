@@ -18,8 +18,8 @@ package eu.cessda.cafe.waiter.resource;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.Database;
-import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import eu.cessda.cafe.waiter.message.RequestListener;
+import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
 import lombok.extern.log4j.Log4j2;
@@ -33,7 +33,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.FileNotFoundException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -86,10 +85,8 @@ public class RetrieveOrderResource {
 
         requestListener.requestInitialized(requestId);
 
-        if (orderId == null) {
-            log.warn("OrderId Invalid.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
-        } else {// Is the order already delivered
+        if (orderId != null) {
+            // Is the order already delivered
             var order = database.getOrder().get(orderId);
             if (order != null && order.getOrderDelivered() != null) {
                 // The order has already been delivered
@@ -97,8 +94,16 @@ public class RetrieveOrderResource {
                 return Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
             } else {
                 // Update the orders from the cashier
-                return retrieveOrderFromCashier(orderId);
+                try {
+                    return retrieveOrderFromCashier(orderId);
+                } catch (CashierConnectionException e) {
+                    log.error(e);
+                    return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+                }
             }
+        } else {
+            log.warn("OrderId Invalid.");
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
         }
     }
 
@@ -114,17 +119,19 @@ public class RetrieveOrderResource {
      * @param orderId The id of the order to check.
      * @return A response containing the state of the order.
      */
-    private Response retrieveOrderFromCashier(UUID orderId) {
-        try {
-            var order = orderService.getOrders(orderId);
+    private Response retrieveOrderFromCashier(UUID orderId) throws CashierConnectionException {
+
+        var order = orderService.getOrders(orderId);
+
+        if (order != null) {
 
             // check conditions whether any open jobs are done and orders delivered
-            database.getOrder().put(order.getOrderId(), order);
+            database.getOrder().putIfAbsent(order.getOrderId(), order);
 
             // Collect all processed jobs from the cashier and retrieve them from the coffee machine
             jobService.collectJobs();
 
-            // Does the order have all it's jobs retrieved?
+            // Does the order have all its jobs retrieved?
             boolean success = true;
             for (Job job : order.getJobs()) {
                 var retrievedJob = database.getJob().get(job.getJobId());
@@ -145,10 +152,8 @@ public class RetrieveOrderResource {
                 log.info("Order {} not ready.", order.getOrderId());
                 return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage(ORDER_NOT_READY)).build();
             }
-        } catch (CashierConnectionException e) {
-            return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
-        } catch (FileNotFoundException e) {
-            log.warn("Order {} unknown.", orderId);
+        } else {
+            log.warn("The order {} was not found on the cashier.", orderId);
             return Response.status(Response.Status.NOT_FOUND).entity(new ApiMessage(ORDER_UNKNOWN)).build();
         }
     }

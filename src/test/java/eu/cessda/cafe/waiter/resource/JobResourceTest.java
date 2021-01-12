@@ -16,23 +16,20 @@
 package eu.cessda.cafe.waiter.resource;
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
-import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
+import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
-import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class JobResourceTest {
 
     private static final String MOCKED = "Mocked!";
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     void shouldReturnApiMessageOnSuccess() throws CashierConnectionException {
@@ -43,14 +40,14 @@ class JobResourceTest {
 
         // Act
         try (var response = jobResource.postCollectJobs()) {
-            Assert.assertEquals(ApiMessage.class, response.getEntity().getClass());
+            assertEquals(ApiMessage.class, response.getEntity().getClass());
             ApiMessage message = (ApiMessage) response.getEntity();
-            Assert.assertEquals(MOCKED, message.getMessage());
+            assertEquals(MOCKED, message.getMessage());
         }
     }
 
     @Test
-    void shouldReturnServerErrorOnCasherConnectionError() throws CashierConnectionException {
+    void shouldReturnServerErrorOnCashierConnectionError() throws CashierConnectionException {
         // Setup
         var jobService = Mockito.mock(JobService.class);
         var jobResource = new JobResource(jobService);
@@ -59,7 +56,7 @@ class JobResourceTest {
 
         // Act
         try (var response = jobResource.postCollectJobs()) {
-            Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+            assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         }
     }
 }

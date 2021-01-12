@@ -18,10 +18,10 @@ package eu.cessda.cafe.waiter.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.Order;
-import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import lombok.extern.log4j.Log4j2;
 import org.jvnet.hk2.annotations.Service;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -49,14 +49,15 @@ public class OrderService {
     }
 
     /**
-     * Gets the order history for an order with a specific orderId from the cashier
+     * Gets the order history for an order with a specific orderId from the cashier. If the order was not present
+     * on the cashier, then {@code null} is returned.
      *
      * @param orderId The orderId to get
-     * @return the order associated with the order ID
+     * @return the order associated with the order ID, or {@code null} if the order was not present on the cashier
      * @throws CashierConnectionException if a connection error occurred connecting to the cashier
-     * @throws FileNotFoundException      if the order was not found on the cashier
      */
-    public Order getOrders(UUID orderId) throws CashierConnectionException, FileNotFoundException {
+    @Nullable
+    public Order getOrders(UUID orderId) throws CashierConnectionException {
         log.info("Collecting order {} from Cashier {}.", orderId, WaiterApplication.getCashierUrl());
         try {
             // Collect only the specified order
@@ -64,10 +65,10 @@ public class OrderService {
             var orderIdEndpoint = orderHistoryEndpoint.resolve(orderId.toString());
             return objectMapper.readValue(orderIdEndpoint.toURL(), Order.class);
         } catch (FileNotFoundException e) {
-            log.warn("The order {} was not found on the cashier.", orderId);
-            throw e;
-        } catch (IOException e) { // Send the exception up so a 500 can be generated
-            log.error("Error connecting to cashier {}: {}", WaiterApplication.getCashierUrl(), e);
+            // The order was not found
+            return null;
+        } catch (IOException e) {
+            // Send the exception up so a 500 can be generated
             throw new CashierConnectionException(WaiterApplication.getCashierUrl(), e);
         }
     }

@@ -66,7 +66,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-jspc-maven-plugin</artifactId>
-                <version>9.3.6.v20151106</version>
+                <version>10.0.0</version>
                 <executions>
                     <execution>
                         <id>jspc</id>
@@ -84,17 +84,22 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--Embedded Jetty for debugging-->
+            <!--Embedded Jetty for development and debugging-->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.23.v20191118</version>
+                <version>10.0.0</version>
+                <configuration>
+                    <httpConnector>
+                        <port>1338</port>
+                    </httpConnector>
+                </configuration>
             </plugin>
             <!--Docker Containerisation-->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>2.5.2</version>
+                <version>2.7.1</version>
                 <configuration>
                     <to>
                         <image>cessda/${project.artifactId}:${project.version}</image>
@@ -140,14 +145,14 @@
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>2.31</version>
+                <version>2.33</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.11.0</version>
+                <version>2.12.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -155,7 +160,7 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-bom</artifactId>
-                <version>2.13.3</version>
+                <version>2.14.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -229,7 +234,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.6.2</version>
+            <version>5.6.3</version>
             <scope>test</scope>
         </dependency>
         <!-- testing -->

@@ -20,7 +20,7 @@ package eu.cessda.cafe.waiter.resource;
  */
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
-import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
+import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 
 import javax.inject.Inject;

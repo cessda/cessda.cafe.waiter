@@ -21,7 +21,6 @@ import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.Database;
-import eu.cessda.cafe.waiter.exceptions.CashierConnectionException;
 import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jvnet.hk2.annotations.Service;
