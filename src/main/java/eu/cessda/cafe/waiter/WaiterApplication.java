@@ -56,7 +56,7 @@ public class WaiterApplication extends ResourceConfig {
             protected void configure() {
                 // Internal dependencies
                 bindAsContract(CoffeeMachineHelper.class);
-                bindAsContract(Database.class);
+                bind(new Database()).to(Database.class);
                 bindAsContract(JobService.class);
                 bindAsContract(OrderService.class);
 

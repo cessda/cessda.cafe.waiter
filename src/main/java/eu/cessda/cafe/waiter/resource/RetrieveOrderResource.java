@@ -18,7 +18,6 @@ package eu.cessda.cafe.waiter.resource;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.Database;
-import eu.cessda.cafe.waiter.message.RequestListener;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
@@ -36,7 +35,6 @@ import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -52,7 +50,6 @@ public class RetrieveOrderResource {
     private static final String ORDER_NOT_READY = "Order not ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
 
-    private final RequestListener requestListener = new RequestListener();
     private final JobService jobService;
     private final OrderService orderService;
     private final Database database;
@@ -74,36 +71,20 @@ public class RetrieveOrderResource {
     @Path("/{orderId}")
     public Response getOrder(@PathParam("orderId") UUID orderId, @Context HttpHeaders requestHeaders) {
 
-        List<String> requestHeader = requestHeaders.getRequestHeader("X-Request-Id");
-        String requestId;
-
-        if (requestHeader == null) {
-            requestId = UUID.randomUUID().toString();
-        } else {
-            requestId = requestHeader.get(0);
-        }
-
-        requestListener.requestInitialized(requestId);
-
-        if (orderId != null) {
-            // Is the order already delivered
-            var order = database.getOrder().get(orderId);
-            if (order != null && order.getOrderDelivered() != null) {
-                // The order has already been delivered
-                log.info("Order {} already retrieved.", order.getOrderId());
-                return Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
-            } else {
-                // Update the orders from the cashier
-                try {
-                    return retrieveOrderFromCashier(orderId);
-                } catch (CashierConnectionException e) {
-                    log.error(e);
-                    return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
-                }
+        // Is the order already delivered
+        var order = database.getOrder().get(orderId);
+        if (order == null || order.getOrderDelivered() == null) {
+            // Update the orders from the cashier
+            try {
+                return retrieveOrderFromCashier(orderId);
+            } catch (CashierConnectionException e) {
+                log.error(e);
+                return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
             }
         } else {
-            log.warn("OrderId Invalid.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage("Invalid orderId")).build();
+            // The order has already been delivered
+            log.info("Order {} already retrieved.", order.getOrderId());
+            return Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
         }
     }
 

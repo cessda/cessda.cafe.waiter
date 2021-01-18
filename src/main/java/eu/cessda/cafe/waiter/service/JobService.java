@@ -65,9 +65,7 @@ public class JobService {
             var processedJobs = objectMapper.<List<Job>>readValue(processedJobsEndpoint.toURL(), new TypeReference<>() {
             });
 
-            if (log.isTraceEnabled()) {
-                log.trace(processedJobs);
-            }
+            log.trace(() -> processedJobs);
 
             AtomicInteger jobsCollected = new AtomicInteger();
             AtomicInteger jobsNotCollected = new AtomicInteger();

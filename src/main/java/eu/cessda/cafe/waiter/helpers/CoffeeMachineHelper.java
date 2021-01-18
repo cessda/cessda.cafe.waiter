@@ -25,6 +25,7 @@ import org.jvnet.hk2.annotations.Service;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -56,39 +57,34 @@ public class CoffeeMachineHelper {
     public CoffeeMachineResponse retrieveJob(URI coffeeMachineUrl, UUID id) {
         log.info("Retrieving job {} from {}.", id, coffeeMachineUrl);
 
-        CoffeeMachineResponse responseMap = null;
-        String response = null;
-
         // Set the connection url
         var retrieveJobUrl = coffeeMachineUrl.resolve("retrieve-job/").resolve(id.toString());
 
         try {
             // Read the response to a string
             var httpRequest = HttpRequest.newBuilder(retrieveJobUrl).build();
-            var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            response = httpResponse.body();
+            var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
 
             if (httpResponse.statusCode() < 400) {
-                responseMap = objectMapper.readValue(response, CoffeeMachineResponse.class);
+                // Get the response
+                var responseMap = objectMapper.readValue(httpResponse.body(), CoffeeMachineResponse.class);
+                log.trace(responseMap);
+                return responseMap;
+
             } else {
-                throw new IOException("Server returned code " + httpResponse.statusCode());
+                // Parse the message from the coffee machine to determine what should be logged
+                parseCoffeeMachineResponse(coffeeMachineUrl, httpResponse.body(), id);
             }
 
-            // Get the response
-
-            if (log.isTraceEnabled()) log.trace(responseMap);
         } catch (JsonParseException | JsonMappingException e) {
-            log.error("Couldn't parse result from the coffee machine:", e);
+            log.error("Couldn't parse result from the coffee machine {}:", coffeeMachineUrl, e);
         } catch (IOException e) {
-            // Parse the message from the coffee machine to determine what should be logged
-            if (!parseCoffeeMachineResponse(coffeeMachineUrl, response, id)) {
-                log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
-            }
+            log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
         } catch (InterruptedException e) {
             log.warn("Interrupted! HTTP request cancelled:", e);
             Thread.currentThread().interrupt();
         }
-        return responseMap;
+        return null;
     }
 
     /**
@@ -97,26 +93,18 @@ public class CoffeeMachineHelper {
      *
      * @param response The response from the coffee machine.
      * @param id       The jobId.
-     * @return true if the message was parsed successfully, false otherwise.
+     * @throws IOException if an IO error occurred.
      */
-    private boolean parseCoffeeMachineResponse(URI coffeeMachineUrl, String response, UUID id) {
-        try {
-            if (response != null) {
-                var message = objectMapper.readValue(response, ApiMessage.class);
-                if (message.getMessage().equalsIgnoreCase("job unknown")) {
-                    log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
-                } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
-                    log.info("Job {} is not ready on coffee machine {}.", id, coffeeMachineUrl);
-                } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
-                    log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
-                } else { // Default handling
-                    log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.getMessage());
-                }
-                return true;
-            }
-        } catch (IOException e) {
-            log.error("Response from {} couldn't be parsed.", coffeeMachineUrl, e);
+    private void parseCoffeeMachineResponse(URI coffeeMachineUrl, InputStream response, UUID id) throws IOException {
+        var message = objectMapper.readValue(response, ApiMessage.class);
+        if (message.getMessage().equalsIgnoreCase("job unknown")) {
+            log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
+        } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
+            log.info("Job {} is not ready on coffee machine {}.", id, coffeeMachineUrl);
+        } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
+            log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
+        } else { // Default handling
+            log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.getMessage());
         }
-        return false;
     }
 }
