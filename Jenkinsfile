@@ -2,6 +2,7 @@ pipeline {
     options {
         ansiColor('xterm')
         buildDiscarder logRotator(artifactNumToKeepStr: '5', numToKeepStr: '10')
+        disableConcurrentBuilds abortPrevious: true
     }
 
     environment {
