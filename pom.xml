@@ -88,7 +88,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>10.0.2</version>
+                <version>10.0.7</version>
                 <configuration>
                     <httpConnector>
                         <port>1338</port>
