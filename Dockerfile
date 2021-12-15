@@ -10,7 +10,7 @@ COPY . .
 RUN mvn verify
 
 # Package
-FROM tomcat:10.0-jdk11 AS final
+FROM tomcat:10.1-jdk11 AS final
 WORKDIR /usr/local/tomcat/webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /src/target/*.war /usr/local/tomcat/webapps/ROOT.war
