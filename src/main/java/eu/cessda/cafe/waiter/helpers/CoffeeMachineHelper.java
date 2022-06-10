@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.response.CoffeeMachineResponse;
-import lombok.extern.log4j.Log4j2;
+import jakarta.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jvnet.hk2.annotations.Service;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -35,9 +36,9 @@ import java.util.UUID;
 /**
  * Holds methods to talk to remote coffee machines
  */
-@Log4j2
 @Service
 public class CoffeeMachineHelper {
+    private static final Logger log = LogManager.getLogger(CoffeeMachineHelper.class);
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -97,14 +98,14 @@ public class CoffeeMachineHelper {
      */
     private void parseCoffeeMachineResponse(URI coffeeMachineUrl, InputStream response, UUID id) throws IOException {
         var message = objectMapper.readValue(response, ApiMessage.class);
-        if (message.getMessage().equalsIgnoreCase("job unknown")) {
+        if (message.message().equalsIgnoreCase("job unknown")) {
             log.warn("Job {} is unknown on coffee machine {}.", id, coffeeMachineUrl);
-        } else if (message.getMessage().equalsIgnoreCase("job not ready")) {
+        } else if (message.message().equalsIgnoreCase("job not ready")) {
             log.info("Job {} is not ready on coffee machine {}.", id, coffeeMachineUrl);
-        } else if (message.getMessage().equalsIgnoreCase("job already retrieved")) {
+        } else if (message.message().equalsIgnoreCase("job already retrieved")) {
             log.warn("Job {} has already been retrieved from coffee machine {}.", id, coffeeMachineUrl);
         } else { // Default handling
-            log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.getMessage());
+            log.warn("Coffee machine {} returned message {}.", coffeeMachineUrl, message.message());
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package eu.cessda.cafe.waiter.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.Order;
-import lombok.extern.log4j.Log4j2;
+import jakarta.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jvnet.hk2.annotations.Service;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
@@ -31,9 +31,9 @@ import java.util.UUID;
 /**
  * Java Engine class to process logic on /retrieve-order/ end points
  */
-@Log4j2
 @Service
 public class OrderService {
+    private final Logger log = LogManager.getLogger(OrderService.class);
 
     private final ObjectMapper objectMapper;
 
@@ -56,7 +56,6 @@ public class OrderService {
      * @return the order associated with the order ID, or {@code null} if the order was not present on the cashier
      * @throws CashierConnectionException if a connection error occurred connecting to the cashier
      */
-    @Nullable
     public Order getOrders(UUID orderId) throws CashierConnectionException {
         log.info("Collecting order {} from Cashier {}.", orderId, WaiterApplication.getCashierUrl());
         try {

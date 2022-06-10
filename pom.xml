@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright CESSDA ERIC 2020.
+  ~ Copyright CESSDA ERIC 2022.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~ use this file except in compliance with the License.
@@ -28,8 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jdk.version>11</jdk.version>
-        <lombok.version>1.18.16</lombok.version>
+        <jdk.version>17</jdk.version>
     </properties>
 
     <build>
@@ -44,29 +43,20 @@
                     <target>${jdk.version}</target>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
-                        <arg>-XDcompilePolicy=simple</arg>
-                        <arg>-Xplugin:ErrorProne -Xep:UnusedVariable:OFF</arg>
                     </compilerArgs>
-                    <annotationProcessorPaths>
-                        <!--Error Prone-->
-                        <path>
-                            <groupId>com.google.errorprone</groupId>
-                            <artifactId>error_prone_core</artifactId>
-                            <version>2.3.4</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <!--WAR Plugin-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.1</version>
             </plugin>
             <!--JSP Compiler-->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-jspc-maven-plugin</artifactId>
-                <version>10.0.7</version>
+                <version>11.0.9</version>
                 <executions>
                     <execution>
                         <id>jspc</id>
@@ -88,7 +78,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>10.0.7</version>
+                <version>11.0.9</version>
                 <configuration>
                     <httpConnector>
                         <port>1338</port>
@@ -145,7 +135,7 @@
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>2.35</version>
+                <version>3.0.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -221,14 +211,7 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jersey2-jaxrs</artifactId>
-            <version>1.6.3</version>
-        </dependency>
-        <!--Lombok-->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
+            <version>1.6.6</version>
         </dependency>
         <!-- J-unit test -->
         <dependency>
@@ -246,7 +229,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.12.4</version>
+            <version>4.5.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

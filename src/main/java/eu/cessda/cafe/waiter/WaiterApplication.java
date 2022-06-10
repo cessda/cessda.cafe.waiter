@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -26,11 +26,12 @@ import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
-import lombok.extern.log4j.Log4j2;
+import jakarta.ws.rs.ApplicationPath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.ws.rs.ApplicationPath;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,9 +39,10 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.time.Duration;
 
-@Log4j2
 @ApplicationPath("/")
 public class WaiterApplication extends ResourceConfig {
+    private static final Logger log = LogManager.getLogger(WaiterApplication.class);
+
     private static final URI DEFAULT_CASHIER_URL = URI.create("http://localhost:1336/");
     private static URI cashierUrl;
 

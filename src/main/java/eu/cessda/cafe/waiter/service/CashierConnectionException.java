@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,14 +15,11 @@
 
 package eu.cessda.cafe.waiter.service;
 
-import lombok.Getter;
-
 import java.net.URI;
 
 /**
  * Represents connection errors to the cashier
  */
-@Getter
 public class CashierConnectionException extends Exception {
 
     private final URI cashierUrl;
@@ -35,7 +32,10 @@ public class CashierConnectionException extends Exception {
      */
     public CashierConnectionException(URI cashierUrl, Throwable cause) {
         super("Error connecting to cashier " + cashierUrl + ": " + cause.toString(), cause);
-
         this.cashierUrl = cashierUrl;
+    }
+
+    public URI getCashierUrl() {
+        return cashierUrl;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
-import lombok.extern.log4j.Log4j2;
+import jakarta.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jvnet.hk2.annotations.Service;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -34,10 +35,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /*
  * Java Engine class to process logic on /collect-jobs end point
  */
-
-@Log4j2
 @Service
 public class JobService {
+    private static final Logger log = LogManager.getLogger(JobService.class);
 
     private final URI cashierUri;
     private final CoffeeMachineHelper coffeeMachineHelper;
@@ -75,12 +75,12 @@ public class JobService {
                 var coffeeMachineResponse = coffeeMachineHelper.retrieveJob(job.getMachine(), job.getJobId());
                 if (coffeeMachineResponse != null) {
                     // Copy known variables from the coffee machine
-                    job.setJobId(coffeeMachineResponse.getJobId());
-                    job.setJobStarted(coffeeMachineResponse.getJobStarted());
-                    job.setProduct(coffeeMachineResponse.getProduct());
+                    job.setJobId(coffeeMachineResponse.jobId());
+                    job.setJobStarted(coffeeMachineResponse.jobStarted());
+                    job.setProduct(coffeeMachineResponse.product());
 
                     // Set job as retrieved at the current time
-                    job.setJobRetrieved(coffeeMachineResponse.getJobRetrieved());
+                    job.setJobRetrieved(coffeeMachineResponse.jobRetrieved());
 
                     // Add the job to the persistent data store
                     database.getJob().put(job.getJobId(), job);

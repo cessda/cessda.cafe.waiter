@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,21 +15,12 @@
 
 package eu.cessda.cafe.waiter.data.model;
 
-import lombok.NonNull;
-import lombok.Value;
-
 /**
  * Class to hold messages sent to other Coffee API components
+ *
+ * @param message the message to store
  */
-@Value
-public class ApiMessage {
-
-    /**
-     * The message to store
-     */
-    @NonNull
-    String message;
-
+public record ApiMessage(String message) {
     /**
      * Collected jobs message
      *

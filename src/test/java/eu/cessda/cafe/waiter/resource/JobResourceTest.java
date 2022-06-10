@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package eu.cessda.cafe.waiter.resource;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 
@@ -42,7 +42,7 @@ class JobResourceTest {
         try (var response = jobResource.postCollectJobs()) {
             assertEquals(ApiMessage.class, response.getEntity().getClass());
             ApiMessage message = (ApiMessage) response.getEntity();
-            assertEquals(MOCKED, message.getMessage());
+            assertEquals(MOCKED, message.message());
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -21,17 +21,18 @@ import eu.cessda.cafe.waiter.database.Database;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
-import lombok.extern.log4j.Log4j2;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -43,8 +44,8 @@ import java.util.UUID;
  */
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/retrieve-order")
-@Log4j2
 public class RetrieveOrderResource {
+    private static final Logger log = LogManager.getLogger(RetrieveOrderResource.class);
 
     private static final String ORDER_UNKNOWN = "Order unknown";
     private static final String ORDER_NOT_READY = "Order not ready";
@@ -91,10 +92,10 @@ public class RetrieveOrderResource {
     /**
      * Retrieves an order from the cashier and checks the state of the order.
      * <p/>
-     * This method asks the cashier to get all of the jobs associated with an order, and then checks to see if all
+     * This method asks the cashier to get all the jobs associated with an order, and then checks to see if all
      * the jobs associated with the order have been retrieved from the coffee machines.
      * <p/>
-     * If all of the jobs associated with an order have been delivered to the waiter, then the order is marked as
+     * If all the jobs associated with an order have been delivered to the waiter, then the order is marked as
      * delivered and returned to the customer.
      *
      * @param orderId The id of the order to check.

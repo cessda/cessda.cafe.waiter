@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2019.
+ * Copyright CESSDA ERIC 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 package eu.cessda.cafe.waiter.data.response;
 
 import eu.cessda.cafe.waiter.data.model.Product;
-import lombok.Value;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Value
-public class CoffeeMachineResponse {
-    UUID jobId;
-    Product product;
-    OffsetDateTime jobStarted;
-    OffsetDateTime jobReady;
-    OffsetDateTime jobRetrieved;
+public record CoffeeMachineResponse(
+        UUID jobId,
+        Product product,
+        OffsetDateTime jobStarted,
+        OffsetDateTime jobReady,
+        OffsetDateTime jobRetrieved
+) {
 }
