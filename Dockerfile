@@ -2,7 +2,7 @@
 # Built using Maven 3 and JDK 11
 
 # Compile
-FROM maven:3-jdk-17 AS build
+FROM maven:3-openjdk-17 AS build
 WORKDIR /src
 COPY pom.xml .
 RUN mvn dependency:resolve && mvn dependency:resolve-plugins
