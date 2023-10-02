@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -23,7 +23,7 @@ pipeline {
     environment {
         product_name = "cafe"
         module_name = "waiter"
-        image_tag = "${docker_repo}/${product_name}-${module_name}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+        image_tag = "${DOCKER_ARTIFACT_REGISTRY}/${product_name}-${module_name}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
     }
 
     agent any
@@ -82,11 +82,9 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                sh 'gcloud auth configure-docker'
-                withMaven {
-                    sh "./mvnw jib:build -Dimage=${image_tag}"
-                }
-                sh("gcloud container images add-tag ${IMAGE_TAG} ${docker_repo}/${product_name}-${module_name}:${env.BRANCH_NAME}-latest")
+                sh "gcloud auth configure-docker ${ARTIFACT_REGISTRY_HOST}"
+                withMaven { sh "./mvnw jib:build -Dimage=${image_tag}" }
+                sh "gcloud artifacts docker tags add ${image_tag} ${DOCKER_ARTIFACT_REGISTRY}/${product_name}-${module_name}:latest"
             }
             when { branch 'master' }
         }
