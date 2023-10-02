@@ -23,7 +23,7 @@ pipeline {
     environment {
         product_name = "cafe"
         module_name = "waiter"
-        image_tag = "${DOCKER_ARTIFACT_REGISTRY}/${product_name}-${module_name}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+        image_tag = "${DOCKER_ARTIFACT_REGISTRY}/${product_name}-${module_name}:${env.BUILD_NUMBER}"
     }
 
     agent any
