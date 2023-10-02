@@ -29,48 +29,39 @@ pipeline {
     agent any
 
     stages {
-        // Building on master
-        stage('Pull SDK Docker Image') {
+        stage('Build Project') {
             agent {
                 docker {
                     image 'openjdk:17-jdk'
                     reuseNode true
                 }
             }
-            stages {
-                stage('Build Project') {
-                    steps {
-                        withMaven {
-                            sh './mvnw clean install'
-                        }
-                    }
-                    when { branch 'master' }
-                }
-                // Not running on master - test only (for PRs and integration branches)
-                stage('Test Project') {
-                    steps {
-                        withMaven {
-                            sh './mvnw clean test'
-                        }
-                    }
-                    when { not { branch 'master' } }
-                }
-                stage('Record Issues') {
-                    steps {
-                        recordIssues aggregatingResults: true, tools: [errorProne(), java()]
-                    }
-                }
-                stage('Run Sonar Scan') {
-                    steps {
-                        withSonarQubeEnv('cessda-sonar') {
-                            withMaven {
-                                sh './mvnw sonar:sonar'
-                            }
-                        }
-                    }
-                    when { branch 'master' }
+            steps {
+                withMaven {
+                    sh './mvnw clean verify'
                 }
             }
+        }
+        stage('Record Issues') {
+            steps {
+                recordIssues aggregatingResults: true, tools: [errorProne(), java()]
+            }
+        }
+        stage('Run Sonar Scan') {
+            agent {
+                docker {
+                    image 'openjdk:17-jdk'
+                    reuseNode true
+                }
+            }
+            steps {
+                withSonarQubeEnv('cessda-sonar') {
+                    withMaven {
+                        sh './mvnw sonar:sonar'
+                    }
+                }
+            }
+            when { branch 'master' }
         }
         stage("Get Sonar Quality Gate") {
             steps {
