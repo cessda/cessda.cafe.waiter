@@ -27,10 +27,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.UUID;
 
 /**
@@ -40,12 +38,10 @@ import java.util.UUID;
 public class CoffeeMachineHelper {
     private static final Logger log = LogManager.getLogger(CoffeeMachineHelper.class);
 
-    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CoffeeMachineHelper(HttpClient httpClient, ObjectMapper objectMapper) {
-        this.httpClient = httpClient;
+    public CoffeeMachineHelper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
@@ -63,27 +59,27 @@ public class CoffeeMachineHelper {
 
         try {
             // Read the response to a string
-            var httpRequest = HttpRequest.newBuilder(retrieveJobUrl).build();
-            var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+            var connection = (HttpURLConnection) retrieveJobUrl.toURL().openConnection();
 
-            if (httpResponse.statusCode() < 400) {
+            try (var inputStream = connection.getInputStream()) {
                 // Get the response
-                var responseMap = objectMapper.readValue(httpResponse.body(), CoffeeMachineResponse.class);
+                var responseMap = objectMapper.readValue(inputStream, CoffeeMachineResponse.class);
                 log.trace(responseMap);
                 return responseMap;
 
-            } else {
+            } catch (IOException e) {
                 // Parse the message from the coffee machine to determine what should be logged
-                parseCoffeeMachineResponse(coffeeMachineUrl, httpResponse.body(), id);
+                if (connection.getErrorStream() != null) {
+                    parseCoffeeMachineResponse(coffeeMachineUrl, connection.getErrorStream(), id);
+                } else {
+                    throw e;
+                }
             }
 
         } catch (JsonParseException | JsonMappingException e) {
             log.error("Couldn't parse result from the coffee machine {}:", coffeeMachineUrl, e);
         } catch (IOException e) {
-            log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.getMessage());
-        } catch (InterruptedException e) {
-            log.warn("Interrupted! HTTP request cancelled:", e);
-            Thread.currentThread().interrupt();
+            log.error("Error connecting to {}: {}.", coffeeMachineUrl, e.toString());
         }
         return null;
     }

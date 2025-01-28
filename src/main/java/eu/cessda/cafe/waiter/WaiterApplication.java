@@ -32,8 +32,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.time.Duration;
 
 @SpringBootApplication
 public class WaiterApplication {
@@ -49,13 +47,6 @@ public class WaiterApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WaiterApplication.class, args);
-    }
-
-    @Bean
-    public HttpClient httpClient() {
-        return HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .followRedirects(HttpClient.Redirect.NORMAL).build();
     }
 
     @Bean
