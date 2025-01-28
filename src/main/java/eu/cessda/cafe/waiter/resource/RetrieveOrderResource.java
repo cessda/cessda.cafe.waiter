@@ -70,18 +70,13 @@ public class RetrieveOrderResource {
      * @return The retrieved order, or a message if an error occurred
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<?> getOrder(@PathVariable("orderId") UUID orderId) {
+    public ResponseEntity<?> getOrder(@PathVariable("orderId") UUID orderId) throws CashierConnectionException {
 
         // Is the order already delivered
         var order = orderRepository.findById(orderId).orElse(null);
         if (order == null || order.getOrderDelivered() == null) {
             // Update the orders from the cashier
-            try {
-                return retrieveOrderFromCashier(orderId);
-            } catch (CashierConnectionException e) {
-                log.error(e);
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiMessage(e.getMessage()));
-            }
+            return retrieveOrderFromCashier(orderId);
         } else {
             // The order has already been delivered
             log.info("Order {} already retrieved.", order.getOrderId());

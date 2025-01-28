@@ -23,8 +23,6 @@ import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,11 +40,7 @@ public class JobResource {
 
     // Return message from a post method on /collect-jobs
     @PostMapping
-    public ResponseEntity<ApiMessage> postCollectJobs() {
-        try {
-            return ResponseEntity.ok(jobService.collectJobs());
-        } catch (CashierConnectionException e) { // In the case that the cashier cannot be contacted
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiMessage(e.getMessage()));
-        }
+    public ApiMessage postCollectJobs() throws CashierConnectionException {
+        return jobService.collectJobs();
     }
 }
