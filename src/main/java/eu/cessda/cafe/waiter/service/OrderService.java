@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package eu.cessda.cafe.waiter.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.cessda.cafe.waiter.WaiterApplication;
 import eu.cessda.cafe.waiter.data.model.Order;
-import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jvnet.hk2.annotations.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class OrderService {
     /**
      * Sets the cashier URL used for all further methods in this class
      */
-    @Inject
+    @Autowired
     public OrderService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         orderHistoryEndpoint = WaiterApplication.getCashierUrl().resolve("order-history/");

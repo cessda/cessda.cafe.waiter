@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package eu.cessda.cafe.waiter.data.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -26,8 +28,9 @@ import java.util.UUID;
  * Java Class to store jobs collected from Cashier or Coffee Machine
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Entity
 public class Job {
-    private UUID jobId;
+    @Id private UUID jobId;
     private Product product;
     private UUID orderId;
     private OffsetDateTime orderPlaced;

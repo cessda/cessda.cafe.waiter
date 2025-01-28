@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package eu.cessda.cafe.waiter.resource;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
-import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class JobResourceTest {
 
@@ -39,11 +40,11 @@ class JobResourceTest {
         Mockito.doReturn(new ApiMessage(MOCKED)).when(jobService).collectJobs();
 
         // Act
-        try (var response = jobResource.postCollectJobs()) {
-            assertEquals(ApiMessage.class, response.getEntity().getClass());
-            ApiMessage message = (ApiMessage) response.getEntity();
-            assertEquals(MOCKED, message.message());
-        }
+        var response = jobResource.postCollectJobs();
+        assertNotNull(response.getBody());
+        assertEquals(ApiMessage.class, response.getBody().getClass());
+        ApiMessage message = response.getBody();
+        assertEquals(MOCKED, message.message());
     }
 
     @Test
@@ -55,8 +56,7 @@ class JobResourceTest {
                 new IOException(MOCKED))).when(jobService).collectJobs();
 
         // Act
-        try (var response = jobResource.postCollectJobs()) {
-            assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-        }
+        var response = jobResource.postCollectJobs();
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 }

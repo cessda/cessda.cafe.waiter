@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -17,21 +17,20 @@ package eu.cessda.cafe.waiter.resource;
 
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
-import eu.cessda.cafe.waiter.database.Database;
+import eu.cessda.cafe.waiter.database.JobRepository;
+import eu.cessda.cafe.waiter.database.OrderRepository;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import eu.cessda.cafe.waiter.service.OrderService;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -42,8 +41,8 @@ import java.util.UUID;
 /**
  * Java Resource class to expose /retrieve-order/orderId end point.
  */
-@Produces(MediaType.APPLICATION_JSON)
-@Path("/retrieve-order")
+@RestController
+@RequestMapping("/retrieve-order")
 public class RetrieveOrderResource {
     private static final Logger log = LogManager.getLogger(RetrieveOrderResource.class);
 
@@ -51,15 +50,17 @@ public class RetrieveOrderResource {
     private static final String ORDER_NOT_READY = "Order not ready";
     private static final String ORDER_ALREADY_DELIVERED = "Order already delivered";
 
+    private final JobRepository jobRepository;
     private final JobService jobService;
     private final OrderService orderService;
-    private final Database database;
+    private final OrderRepository orderRepository;
 
-    @Inject
-    public RetrieveOrderResource(JobService jobService, OrderService orderService, Database database) {
+    @Autowired
+    public RetrieveOrderResource(JobRepository jobRepository, JobService jobService, OrderService orderService, OrderRepository orderRepository) {
+        this.jobRepository = jobRepository;
         this.jobService = jobService;
         this.orderService = orderService;
-        this.database = database;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -68,24 +69,23 @@ public class RetrieveOrderResource {
      * @param orderId The order to retrieve
      * @return The retrieved order, or a message if an error occurred
      */
-    @GET
-    @Path("/{orderId}")
-    public Response getOrder(@PathParam("orderId") UUID orderId, @Context HttpHeaders requestHeaders) {
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> getOrder(@PathVariable("orderId") UUID orderId) {
 
         // Is the order already delivered
-        var order = database.getOrder().get(orderId);
+        var order = orderRepository.findById(orderId).orElse(null);
         if (order == null || order.getOrderDelivered() == null) {
             // Update the orders from the cashier
             try {
                 return retrieveOrderFromCashier(orderId);
             } catch (CashierConnectionException e) {
                 log.error(e);
-                return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiMessage(e.getMessage()));
             }
         } else {
             // The order has already been delivered
             log.info("Order {} already retrieved.", order.getOrderId());
-            return Response.status(Response.Status.GONE).entity(new ApiMessage(ORDER_ALREADY_DELIVERED)).build();
+            return ResponseEntity.status(HttpStatus.GONE).body(new ApiMessage(ORDER_ALREADY_DELIVERED));
         }
     }
 
@@ -101,14 +101,14 @@ public class RetrieveOrderResource {
      * @param orderId The id of the order to check.
      * @return A response containing the state of the order.
      */
-    private Response retrieveOrderFromCashier(UUID orderId) throws CashierConnectionException {
+    private ResponseEntity<?> retrieveOrderFromCashier(UUID orderId) throws CashierConnectionException {
 
         var order = orderService.getOrders(orderId);
 
         if (order != null) {
 
             // check conditions whether any open jobs are done and orders delivered
-            database.getOrder().putIfAbsent(order.getOrderId(), order);
+            order = orderRepository.findById(order.getOrderId()).orElse(order);
 
             // Collect all processed jobs from the cashier and retrieve them from the coffee machine
             jobService.collectJobs();
@@ -116,9 +116,12 @@ public class RetrieveOrderResource {
             // Does the order have all its jobs retrieved?
             boolean success = true;
             for (Job job : order.getJobs()) {
-                var retrievedJob = database.getJob().get(job.getJobId());
-                if (retrievedJob != null) {
-                    log.info("Retrieved job {} of order {}.", retrievedJob.getJobId(), order.getOrderId());
+                var repositoryJob = jobRepository.findById(job.getJobId())
+                        // Save the job to the local repository
+                        .orElseGet(() -> jobRepository.save(job));
+
+                if (repositoryJob.getJobRetrieved() != null) {
+                    log.info("Retrieved job {} of order {}.", repositoryJob.getJobId(), order.getOrderId());
                 } else {
                     log.warn("Couldn't retrieve job {} of order {}.", job.getJobId(), order.getOrderId());
                     success = false;
@@ -127,16 +130,18 @@ public class RetrieveOrderResource {
             if (success) {
                 // Deliver the order
                 order.setOrderDelivered(OffsetDateTime.now(ZoneId.from(ZoneOffset.UTC)));
+                order = orderRepository.save(order);
                 log.info("Order {} retrieved.", order.getOrderId());
-                return Response.ok().entity(order).build();
+                return ResponseEntity.ok().body(order);
             } else {
                 // Not all jobs are retrieved
                 log.info("Order {} not ready.", order.getOrderId());
-                return Response.status(Response.Status.BAD_REQUEST).entity(new ApiMessage(ORDER_NOT_READY)).build();
+                orderRepository.save(order);
+                return ResponseEntity.badRequest().body(new ApiMessage(ORDER_NOT_READY));
             }
         } else {
             log.warn("The order {} was not found on the cashier.", orderId);
-            return Response.status(Response.Status.NOT_FOUND).entity(new ApiMessage(ORDER_UNKNOWN)).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiMessage(ORDER_UNKNOWN));
         }
     }
 }

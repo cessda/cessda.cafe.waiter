@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -22,33 +22,31 @@ package eu.cessda.cafe.waiter.resource;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Path("/collect-jobs")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping("/collect-jobs")
 public class JobResource {
 
     private final JobService jobService;
 
-    @Inject
+    @Autowired
     public JobResource(JobService jobService) {
         this.jobService = jobService;
     }
 
     // Return message from a post method on /collect-jobs
-    @POST
-    public Response postCollectJobs() {
+    @PostMapping
+    public ResponseEntity<ApiMessage> postCollectJobs() {
         try {
-            return Response.ok(jobService.collectJobs()).build();
+            return ResponseEntity.ok(jobService.collectJobs());
         } catch (CashierConnectionException e) { // In the case that the cashier cannot be contacted
-            return Response.serverError().entity(new ApiMessage(e.getMessage())).build();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ApiMessage(e.getMessage()));
         }
     }
 }

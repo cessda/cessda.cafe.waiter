@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -16,16 +16,23 @@
 package eu.cessda.cafe.waiter.data.model;
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
+@Entity
+@Table(name="ORDR") // ORDER is an SQL keyword and cannot be used as a table name
 public class Order {
-    private UUID orderId;
+    @Id private UUID orderId;
     private OffsetDateTime orderPlaced;
     private int orderSize;
-    private List<Job> jobs;
+    @OneToMany private Set<Job> jobs;
     private OffsetDateTime orderDelivered;
 
     public UUID getOrderId() {
@@ -52,11 +59,11 @@ public class Order {
         this.orderSize = orderSize;
     }
 
-    public List<Job> getJobs() {
+    public Set<Job> getJobs() {
         return jobs;
     }
 
-    public void setJobs(List<Job> jobs) {
+    public void setJobs(Set<Job> jobs) {
         this.jobs = jobs;
     }
 

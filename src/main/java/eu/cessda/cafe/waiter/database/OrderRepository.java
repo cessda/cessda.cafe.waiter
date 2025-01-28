@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2020.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,28 +15,10 @@
 
 package eu.cessda.cafe.waiter.database;
 
-/*
- * HashMap to collect and hold data in Java Memory
- */
-
-import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.data.model.Order;
-import org.jvnet.hk2.annotations.Service;
+import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-@Service
-public class Database {
-    private final ConcurrentHashMap<UUID, Order> order = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, Job> job = new ConcurrentHashMap<>();
-
-    public ConcurrentMap<UUID, Order> getOrder() {
-        return order;
-    }
-
-    public ConcurrentMap<UUID, Job> getJob() {
-        return job;
-    }
+public interface OrderRepository extends ListCrudRepository<Order, UUID> {
 }
