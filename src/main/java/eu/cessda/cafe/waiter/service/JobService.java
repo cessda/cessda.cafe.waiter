@@ -17,7 +17,7 @@ package eu.cessda.cafe.waiter.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.cessda.cafe.waiter.WaiterApplication;
+import eu.cessda.cafe.waiter.data.Configuration;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
 import eu.cessda.cafe.waiter.database.JobRepository;
@@ -47,9 +47,9 @@ public class JobService {
     private final URI processedJobsEndpoint;
 
     @Autowired
-    public JobService(CoffeeMachineHelper coffeeMachineHelper, JobRepository jobRepository, ObjectMapper objectMapper) {
+    public JobService(Configuration configuration, CoffeeMachineHelper coffeeMachineHelper, JobRepository jobRepository, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.cashierUri = WaiterApplication.getCashierUrl();
+        this.cashierUri = configuration.cashierUrl();
         this.coffeeMachineHelper = coffeeMachineHelper;
         this.jobRepository = jobRepository;
 

@@ -16,7 +16,7 @@
 package eu.cessda.cafe.waiter.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.cessda.cafe.waiter.WaiterApplication;
+import eu.cessda.cafe.waiter.data.Configuration;
 import eu.cessda.cafe.waiter.data.model.Order;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,15 +37,17 @@ public class OrderService {
 
     private final ObjectMapper objectMapper;
 
+    private final URI cashierUrl;
     private final URI orderHistoryEndpoint;
 
     /**
      * Sets the cashier URL used for all further methods in this class
      */
     @Autowired
-    public OrderService(ObjectMapper objectMapper) {
+    public OrderService(Configuration configuration, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        orderHistoryEndpoint = WaiterApplication.getCashierUrl().resolve("order-history/");
+        this.cashierUrl = configuration.cashierUrl();
+        orderHistoryEndpoint = configuration.cashierUrl().resolve("order-history/");
     }
 
     /**
@@ -57,7 +59,7 @@ public class OrderService {
      * @throws CashierConnectionException if a connection error occurred connecting to the cashier
      */
     public Order getOrders(UUID orderId) throws CashierConnectionException {
-        log.info("Collecting order {} from Cashier {}.", orderId, WaiterApplication.getCashierUrl());
+        log.info("Collecting order {} from Cashier {}.", orderId, cashierUrl);
         try {
             // Collect only the specified order
             log.info("Retrieving order {} from {}.", orderId, orderHistoryEndpoint);
@@ -68,7 +70,7 @@ public class OrderService {
             return null;
         } catch (IOException e) {
             // Send the exception up so a 500 can be generated
-            throw new CashierConnectionException(WaiterApplication.getCashierUrl(), e);
+            throw new CashierConnectionException(cashierUrl, e);
         }
     }
 }
