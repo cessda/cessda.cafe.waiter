@@ -113,27 +113,29 @@ public class TestData implements JobRepository {
 
     @Override
     public void delete(Job entity) {
-        var keys = jobs.entrySet().stream()
+        jobs.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(entity))
-                .map(Map.Entry::getKey).toList();
-
-        for (var key : keys) {
-            jobs.remove(key);
-        }
+                .map(Map.Entry::getKey)
+                .findAny()
+                .ifPresent(jobs::remove);
     }
 
     @Override
     public void deleteAllById(Iterable<? extends UUID> uuids) {
-
+        for (var id : uuids) {
+            deleteById(id);
+        }
     }
 
     @Override
     public void deleteAll(Iterable<? extends Job> entities) {
-
+        for (var entity : entities) {
+            delete(entity);
+        }
     }
 
     @Override
     public void deleteAll() {
-
+        jobs.clear();
     }
 }
