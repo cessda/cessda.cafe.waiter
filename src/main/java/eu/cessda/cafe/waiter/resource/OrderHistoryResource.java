@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -16,30 +16,31 @@
 package eu.cessda.cafe.waiter.resource;
 
 
-import eu.cessda.cafe.waiter.database.Database;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import eu.cessda.cafe.waiter.data.model.Job;
+import eu.cessda.cafe.waiter.database.JobRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Java Resource class to expose /order-history end point.
  */
-@Produces(MediaType.APPLICATION_JSON)
-@Path("/order-history")
+@RestController
+@RequestMapping("/order-history")
 public class OrderHistoryResource {
 
-    private final Database database;
+    private final JobRepository jobRepository;
 
-    @Inject
-    public OrderHistoryResource(Database database) {
-        this.database = database;
+    @Autowired
+    public OrderHistoryResource(JobRepository jobRepository) {
+        this.jobRepository = jobRepository;
     }
 
     /**
@@ -47,9 +48,9 @@ public class OrderHistoryResource {
      *
      * @return A list of all known jobs
      */
-    @GET
-    public Response getOrderHistory() {
-        return Response.ok(database.getJob().values()).build();
+    @GetMapping
+    public List<Job> getOrderHistory() {
+        return jobRepository.findAll();
     }
 
     /**
@@ -58,14 +59,12 @@ public class OrderHistoryResource {
      * @param orderId The order to get
      * @return A list of all jobs in the order
      */
-    @GET
-    @Path("/{orderId}")
-    public Response getOrderHistory(@PathParam("orderId") UUID orderId) {
-        var orders = database.getJob().values();
-        var jobList = orders.stream().filter(job -> job.getOrderId().equals(orderId)).collect(Collectors.toList());
+    @GetMapping("/{orderId}")
+    public ResponseEntity<List<Job>> getOrderHistory(@PathVariable("orderId") UUID orderId) {
+        var jobList = jobRepository.findAllByOrderId(orderId);
         if (jobList.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return Response.ok(jobList).build();
+        return ResponseEntity.ok(jobList);
     }
 }

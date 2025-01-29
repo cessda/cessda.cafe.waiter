@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -17,15 +17,15 @@ package eu.cessda.cafe.waiter.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.cessda.cafe.waiter.WaiterApplication;
+import eu.cessda.cafe.waiter.data.Configuration;
 import eu.cessda.cafe.waiter.data.model.ApiMessage;
 import eu.cessda.cafe.waiter.data.model.Job;
-import eu.cessda.cafe.waiter.database.Database;
+import eu.cessda.cafe.waiter.database.JobRepository;
 import eu.cessda.cafe.waiter.helpers.CoffeeMachineHelper;
-import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jvnet.hk2.annotations.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,17 +41,17 @@ public class JobService {
 
     private final URI cashierUri;
     private final CoffeeMachineHelper coffeeMachineHelper;
-    private final Database database;
+    private final JobRepository jobRepository;
     private final ObjectMapper objectMapper;
 
     private final URI processedJobsEndpoint;
 
-    @Inject
-    public JobService(CoffeeMachineHelper coffeeMachineHelper, Database database, ObjectMapper objectMapper) {
+    @Autowired
+    public JobService(Configuration configuration, CoffeeMachineHelper coffeeMachineHelper, JobRepository jobRepository, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.cashierUri = WaiterApplication.getCashierUrl();
+        this.cashierUri = configuration.cashierUrl();
         this.coffeeMachineHelper = coffeeMachineHelper;
-        this.database = database;
+        this.jobRepository = jobRepository;
 
         processedJobsEndpoint = this.cashierUri.resolve("processed-jobs/");
     }
@@ -71,7 +71,10 @@ public class JobService {
             AtomicInteger jobsNotCollected = new AtomicInteger();
 
             // Start retrieving the job if not retrieved
-            processedJobs.parallelStream().filter(job -> !database.getJob().containsKey(job.getJobId())).forEach(job -> {
+            processedJobs.parallelStream().filter(job -> {
+                var localJob = jobRepository.findById(job.getJobId()).orElse(job);
+                return localJob.getJobRetrieved() == null;
+            }).forEach(job -> {
                 var coffeeMachineResponse = coffeeMachineHelper.retrieveJob(job.getMachine(), job.getJobId());
                 if (coffeeMachineResponse != null) {
                     // Copy known variables from the coffee machine
@@ -83,7 +86,7 @@ public class JobService {
                     job.setJobRetrieved(coffeeMachineResponse.jobRetrieved());
 
                     // Add the job to the persistent data store
-                    database.getJob().put(job.getJobId(), job);
+                    jobRepository.save(job);
 
                     // Set the job as collected
                     log.info("Collected job {}.", job.getJobId());

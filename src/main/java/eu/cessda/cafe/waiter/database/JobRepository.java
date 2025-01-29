@@ -13,18 +13,14 @@
  * governing permissions and limitations under the License.
  */
 
-package eu.cessda.cafe.waiter.resource;
+package eu.cessda.cafe.waiter.database;
 
-import eu.cessda.cafe.waiter.data.model.ApiMessage;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import eu.cessda.cafe.waiter.data.model.Job;
+import org.springframework.data.repository.ListCrudRepository;
 
-@RestController
-@RequestMapping("/healthcheck")
-public class HealthCheckResource {
-    @GetMapping
-    public ApiMessage getHealth() {
-        return ApiMessage.healthy();
-    }
+import java.util.List;
+import java.util.UUID;
+
+public interface JobRepository extends ListCrudRepository<Job, UUID> {
+    List<Job> findAllByOrderId(UUID orderId);
 }

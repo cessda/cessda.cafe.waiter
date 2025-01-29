@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2022.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -15,73 +15,49 @@
 
 package eu.cessda.cafe.waiter.resource;
 
-import eu.cessda.cafe.waiter.data.model.Job;
-import eu.cessda.cafe.waiter.data.model.Order;
-import eu.cessda.cafe.waiter.data.model.Product;
-import eu.cessda.cafe.waiter.database.Database;
-import jakarta.ws.rs.core.Response;
+import eu.cessda.cafe.waiter.TestData;
+import eu.cessda.cafe.waiter.database.JobRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 
-import java.net.URI;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderHistoryResourceTest {
 
-	private final Database database = new Database();
+	private final JobRepository jobRepository;
 
 	private final UUID orderId = UUID.randomUUID();
 	private final UUID jobId = UUID.randomUUID();
 
 	OrderHistoryResourceTest() {
-
-		var job = new Job();
-		job.setJobId(jobId);
-		job.setOrderId(orderId);
-		job.setProduct(Product.COFFEE);
-		job.setOrderPlaced(OffsetDateTime.now().minusHours(1));
-		job.setMachine(URI.create("http://localhost:1336"));
-		job.setJobStarted(OffsetDateTime.now().minusMinutes(16));
-
-		var order = new Order();
-		order.setJobs(Collections.singletonList(job));
-
-		database.getJob().put(job.getJobId(), job);
-		database.getOrder().put(orderId, order);
+		jobRepository = new TestData(orderId, jobId);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void shouldRetrieveEntireOrderHistory() {
-		try (var orderHistoryResponse = new OrderHistoryResource(database).getOrderHistory()) {
 
-			var jobHistory = (Collection<Job>) orderHistoryResponse.getEntity();
+        var jobHistory = new OrderHistoryResource(jobRepository).getOrderHistory();
 
-			assertFalse(jobHistory.isEmpty());
-			assertTrue(jobHistory.stream().anyMatch(job -> job.getJobId().equals(jobId)));
-		}
+		assertFalse(jobHistory.isEmpty());
+		assertTrue(jobHistory.stream().anyMatch(job -> job.getJobId().equals(jobId)));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void shouldRetrieveJobsOfASpecificOrder() {
-		try (var orderHistoryResponse = new OrderHistoryResource(database).getOrderHistory(orderId)) {
+		var orderHistoryResponse = new OrderHistoryResource(jobRepository).getOrderHistory(orderId);
 
-			var jobHistory = (Collection<Job>) orderHistoryResponse.getEntity();
+		var jobHistory = orderHistoryResponse.getBody();
 
-			assertFalse(jobHistory.isEmpty());
-			assertTrue(jobHistory.stream().anyMatch(job -> job.getJobId().equals(jobId)));
-		}
+		assertNotNull(jobHistory);
+		assertFalse(jobHistory.isEmpty());
+		assertTrue(jobHistory.stream().anyMatch(job -> job.getJobId().equals(jobId)));
 	}
 
 	@Test
 	void shouldReturnNotFoundOnInvalidOrder() {
-		try (var orderHistoryResponse = new OrderHistoryResource(database).getOrderHistory(UUID.randomUUID())) {
-			assertEquals(Response.Status.NOT_FOUND.getStatusCode(), orderHistoryResponse.getStatus());
-		}
+		var orderHistoryResponse = new OrderHistoryResource(jobRepository).getOrderHistory(UUID.randomUUID());
+		assertEquals(HttpStatus.NOT_FOUND, orderHistoryResponse.getStatusCode());
 	}
 }
