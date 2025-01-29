@@ -28,7 +28,7 @@
     <groupId>eu.cessda.cafe</groupId>
     <artifactId>waiter</artifactId>
     <packaging>war</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>CESSDA Café: Waiter</name>
     <description>Waiter implementation of the CESSDA Coffee API</description>
     <url>https://bitbucket.org/cessda/cessda.cafe/src/master/index.md</url>
