@@ -31,7 +31,7 @@
     <version>2.0.0-SNAPSHOT</version>
     <name>CESSDA Café: Waiter</name>
     <description>Waiter implementation of the CESSDA Coffee API</description>
-    <url>https://bitbucket.org/cessda/cessda.cafe/src/master/index.md</url>
+    <url>https://github.com/cessda/cessda.cafe/src/master/index.md</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -150,17 +150,17 @@
     </organization>
 
     <ciManagement>
-        <url>https://jenkins-dev.cessda.eu/job/cessda.cafe.waiter/</url>
+        <url>https://jenkins.cessda.eu/job/cessda.cafe.waiter/</url>
         <system>Jenkins</system>
     </ciManagement>
 
     <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/cessda/cessda.cafe.waiter/issues</url>
+        <system>GitHub</system>
+        <url>https://github.com/cessda/cessda.cafe.waiter/issues</url>
     </issueManagement>
 
     <scm>
-        <url>https://bitbucket.org/cessda/cessda.cafe.waiter.git/</url>
+        <url>https://github.com/cessda/cessda.cafe.waiter.git</url>
     </scm>
 
 </project>
