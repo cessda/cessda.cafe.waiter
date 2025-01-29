@@ -16,12 +16,10 @@
 package eu.cessda.cafe.waiter.resource;
 
 import eu.cessda.cafe.waiter.TestData;
-import eu.cessda.cafe.waiter.data.model.Order;
 import eu.cessda.cafe.waiter.database.JobRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,10 +32,7 @@ class OrderHistoryResourceTest {
 	private final UUID jobId = UUID.randomUUID();
 
 	OrderHistoryResourceTest() {
-		 jobRepository = new TestData(orderId, jobId);
-
-		var order = new Order();
-		order.setJobs(Set.copyOf(jobRepository.findAllByOrderId(orderId)));
+		jobRepository = new TestData(orderId, jobId);
 	}
 
 	@Test

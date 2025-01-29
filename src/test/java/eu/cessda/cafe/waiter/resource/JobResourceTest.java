@@ -20,13 +20,11 @@ import eu.cessda.cafe.waiter.service.CashierConnectionException;
 import eu.cessda.cafe.waiter.service.JobService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JobResourceTest {
 
@@ -41,10 +39,8 @@ class JobResourceTest {
 
         // Act
         var response = jobResource.postCollectJobs();
-        assertNotNull(response.getBody());
-        assertEquals(ApiMessage.class, response.getBody().getClass());
-        ApiMessage message = response.getBody();
-        assertEquals(MOCKED, message.message());
+        assertNotNull(response);
+        assertEquals(MOCKED, response.message());
     }
 
     @Test
@@ -52,11 +48,11 @@ class JobResourceTest {
         // Setup
         var jobService = Mockito.mock(JobService.class);
         var jobResource = new JobResource(jobService);
-        Mockito.doThrow(new CashierConnectionException(URI.create("http://localhost:1336/"),
-                new IOException(MOCKED))).when(jobService).collectJobs();
+        Mockito.doThrow(
+                new CashierConnectionException(URI.create("http://localhost:1336/"), new IOException(MOCKED))
+        ).when(jobService).collectJobs();
 
         // Act
-        var response = jobResource.postCollectJobs();
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertThrows(CashierConnectionException.class, jobResource::postCollectJobs);
     }
 }
