@@ -1,5 +1,5 @@
 /*
- * Copyright CESSDA ERIC 2023.
+ * Copyright CESSDA ERIC 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.
@@ -32,7 +32,7 @@ pipeline {
         stage('Build Project') {
             agent {
                 docker {
-                    image 'openjdk:17-jdk'
+                    image 'eclipse-temurin:21'
                     reuseNode true
                 }
             }
@@ -50,7 +50,7 @@ pipeline {
         stage('Run Sonar Scan') {
             agent {
                 docker {
-                    image 'openjdk:17-jdk'
+                    image 'eclipse-temurin:21'
                     reuseNode true
                 }
             }
