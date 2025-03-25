@@ -1,16 +1,25 @@
 # This image uses the Tomcat server
 # Built using Maven 3 and JDK 11
 
-# Compile
-FROM maven:3-openjdk-17 AS build
+# Using Java 21
+FROM eclipse-temurin:21 AS build
 WORKDIR /src
+
+# Copy in the Maven Wrapper
+COPY mvnw .
+COPY .mvn .mvn
+
+# Resovle dependencies
 COPY pom.xml .
-RUN mvn dependency:resolve && mvn dependency:resolve-plugins
+RUN ./mvnw dependency:resolve && ./mvnw dependency:resolve-plugins
+
+# Compile Waiter
 COPY . .
-RUN mvn verify
+RUN ./mvnw verify
 
 # Package
-FROM tomcat:10.1-jdk17 AS final
-WORKDIR /usr/local/tomcat/webapps
-RUN rm -rf /usr/local/tomcat/webapps/*
-COPY --from=build /src/target/*.war /usr/local/tomcat/webapps/ROOT.war
+FROM eclipse-temurin:21 AS final
+WORKDIR /opt/cessda/waiter
+COPY --from=build /src/target/*.jar /opt/cessda/waiter/waiter.jar
+
+ENTRYPOINT ["java", "-jar", "waiter.jar"]
